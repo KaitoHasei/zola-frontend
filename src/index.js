@@ -5,13 +5,14 @@ import { ChakraProvider } from "@chakra-ui/react";
 import reportWebVitals from "./reportWebVitals";
 import "./assets/styles/global.scss";
 
-import App from "./pages/App";
+import { theme } from "./libs";
+import Router from "./pages";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <ChakraProvider>
-      <App />
+    <ChakraProvider theme={theme}>
+      <Router />
     </ChakraProvider>
   </React.StrictMode>
 );
