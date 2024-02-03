@@ -3,16 +3,20 @@ import ReactDOM from "react-dom/client";
 import { ChakraProvider } from "@chakra-ui/react";
 
 import reportWebVitals from "./reportWebVitals";
-import "./assets/styles/global.scss";
 
-import { theme } from "./libs";
+import { GlobalProvider } from "./contexts/GlobalContext";
 import Router from "./pages";
+import { theme } from "./libs";
+
+import "./assets/styles/global.scss";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <ChakraProvider theme={theme}>
-      <Router />
+      <GlobalProvider>
+        <Router />
+      </GlobalProvider>
     </ChakraProvider>
   </React.StrictMode>
 );

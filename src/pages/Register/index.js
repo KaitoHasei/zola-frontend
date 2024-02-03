@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { Link as ReactRouterLink, useNavigate } from "react-router-dom";
 import {
   Box,
@@ -14,10 +14,9 @@ import { useForm } from "react-hook-form";
 import { post } from "#/axios";
 import { authValidation } from "#/components/Form/validatePattern";
 
-import { GlobalContext } from "#/contexts/GlobalContext";
 import Form, { FormInput } from "#/components/Form";
 
-const Login = () => {
+const Register = () => {
   const navigate = useNavigate();
   const {
     formState: { errors },
@@ -25,17 +24,13 @@ const Login = () => {
     setValue,
     handleSubmit,
   } = useForm();
-  const { logIn } = useContext(GlobalContext);
   const [alertMessage, setAlertMessage] = useState("");
 
-  const onSignIn = async (payload) => {
+  const onSignUp = async (payload) => {
     try {
-      const response = await post("/auth/login", payload);
+      const response = await post("/auth/register", payload);
 
-      if (response.status === 200) {
-        logIn(response.data["access_token"]);
-        return navigate("/");
-      }
+      if (response.status === 200) return navigate("/login");
     } catch (error) {
       setAlertMessage(error.response.data.error.code);
     }
@@ -51,10 +46,10 @@ const Login = () => {
         borderRadius="15px"
         boxShadow="0 1px 0.5px #0000003b"
       >
-        <Box marginBottom="10px" textAlign="center">
-          <Heading>Login</Heading>
-          <Text>Hello! Log in with your email </Text>
-        </Box>
+        <Heading marginBottom="10px" textAlign="center">
+          Create Your Account
+        </Heading>
+        {/* <Text textAlign="center">Hello! Log in with your email </Text> */}
         {alertMessage && (
           <Alert status="error">
             <AlertIcon />
@@ -68,21 +63,22 @@ const Login = () => {
               errors,
               register,
               setValue,
-              onSubmit: handleSubmit(onSignIn),
+              onSubmit: handleSubmit(onSignUp),
             }}
           >
+            <FormInput name="username" label="Username" />
             <FormInput name="email" label="Email" />
             <FormInput name="password" label="Password" type="password" />
             <Box textAlign="center">
-              <Button type="submit">Sign In</Button>
+              <Button type="submit">Sign Up</Button>
             </Box>
           </Form>
         </Box>
         <Box marginTop="20px" textAlign="center">
           <Text>
-            Don&apos;t have an account?{" "}
-            <Link as={ReactRouterLink} to="/register" color="teal.500">
-              Sign Up
+            Have an account?{" "}
+            <Link as={ReactRouterLink} to="/login" color="teal.500">
+              Log In
             </Link>
           </Text>
         </Box>
@@ -91,4 +87,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

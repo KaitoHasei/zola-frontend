@@ -1,27 +1,9 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Box } from "@chakra-ui/react";
-import App from "./App";
-import NotFound from "./404";
-import Login from "./Login";
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <App />,
-  },
-  {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "/register",
-    element: <h1>This is register page</h1>,
-  },
-  {
-    path: "*",
-    element: <NotFound />,
-  },
-]);
+import { routes } from "#/routes";
+
+const router = createBrowserRouter(routes);
 
 const Router = () => {
   return (
