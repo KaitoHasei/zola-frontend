@@ -4,6 +4,7 @@ export const GlobalContext = createContext();
 
 export const GlobalProvider = ({ children }) => {
   const [user, setUser] = useState({});
+  const [conversationId, setConversationId] = useState("");
 
   const logIn = (token = "") => {
     if (!token.trim()) return;
@@ -20,7 +21,9 @@ export const GlobalProvider = ({ children }) => {
     <GlobalContext.Provider
       value={{
         user,
+        conversationId,
         setUser,
+        setConversationId,
         logIn,
         logOut,
       }}

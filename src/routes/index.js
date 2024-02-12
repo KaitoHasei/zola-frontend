@@ -1,7 +1,3 @@
-import { redirect } from "react-router-dom";
-
-import { get } from "#/axios";
-
 import { ProtectAuthRoutes } from "#/components/ProtectRoute";
 import AppLayout from "#/components/Layouts";
 import App from "#/pages/App";
@@ -20,14 +16,6 @@ export const routes = [
         element: <App />,
       },
     ],
-    loader: async () => {
-      return get("/user/me").catch((error) => {
-        if (error.response.status === 401) {
-          localStorage.removeItem("access_token");
-          return redirect("/login");
-        }
-      });
-    },
   },
   {
     path: "/login",

@@ -26,11 +26,15 @@ const Login = () => {
     handleSubmit,
   } = useForm();
   const { logIn } = useContext(GlobalContext);
+  const [loading, setLoading] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
   const onSignIn = async (payload) => {
+    setLoading(true);
     try {
-      const response = await post("/auth/login", payload);
+      const response = await post("/auth/login", payload).finally(() =>
+        setLoading(false)
+      );
 
       if (response.status === 200) {
         logIn(response.data["access_token"]);
@@ -74,7 +78,9 @@ const Login = () => {
             <FormInput name="email" label="Email" />
             <FormInput name="password" label="Password" type="password" />
             <Box textAlign="center">
-              <Button type="submit">Sign In</Button>
+              <Button type="submit" isLoading={loading}>
+                Sign In
+              </Button>
             </Box>
           </Form>
         </Box>

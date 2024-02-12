@@ -24,11 +24,15 @@ const Register = () => {
     setValue,
     handleSubmit,
   } = useForm();
+  const [loading, setLoading] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
   const onSignUp = async (payload) => {
+    setLoading(true);
     try {
-      const response = await post("/auth/register", payload);
+      const response = await post("/auth/register", payload).finally(() =>
+        setLoading(false)
+      );
 
       if (response.status === 200) return navigate("/login");
     } catch (error) {
@@ -70,7 +74,9 @@ const Register = () => {
             <FormInput name="email" label="Email" />
             <FormInput name="password" label="Password" type="password" />
             <Box textAlign="center">
-              <Button type="submit">Sign Up</Button>
+              <Button type="submit" isLoading={loading}>
+                Sign Up
+              </Button>
             </Box>
           </Form>
         </Box>
