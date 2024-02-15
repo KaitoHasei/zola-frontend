@@ -1,4 +1,5 @@
 import { Box, Avatar, Text } from "@chakra-ui/react";
+import PropTypes from "prop-types";
 
 const UserSearched = ({ user, onAddFriend }) => {
   return (
@@ -22,3 +23,21 @@ const UserSearched = ({ user, onAddFriend }) => {
 };
 
 export default UserSearched;
+
+UserSearched.propTypes = {
+  user: PropTypes.shape({
+    id: PropTypes.string,
+    displayName: PropTypes.string,
+    photoUrl: PropTypes.string,
+  }),
+  onAddFriend: PropTypes.func,
+};
+
+UserSearched.defaultProps = {
+  user: {
+    id: "",
+    displayName: "",
+    photoUrl: "",
+  },
+  onAddFriend: () => {},
+};

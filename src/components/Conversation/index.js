@@ -1,4 +1,5 @@
 import { Box, Avatar, Text } from "@chakra-ui/react";
+import PropTypes from "prop-types";
 
 import { formatConversationName } from "#/utils";
 import { useContext } from "react";
@@ -27,7 +28,9 @@ const Conversation = ({ conversation, onClick }) => {
       >
         <Avatar />
         <Box marginLeft="10px" flex={1}>
-          <Text as="b">{formatConversationName(conversation, user.id)}</Text>
+          <Text as="b" noOfLines={1}>
+            {formatConversationName(conversation, user.id)}
+          </Text>
           <Text fontSize="sm" color="#65676b">
             Latest message
           </Text>
@@ -38,3 +41,28 @@ const Conversation = ({ conversation, onClick }) => {
 };
 
 export default Conversation;
+
+Conversation.propTypes = {
+  conversation: PropTypes.shape({
+    id: PropTypes.string,
+    participants: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.string,
+        displayName: PropTypes.string,
+        photoUrl: PropTypes.string,
+      })
+    ),
+    name: PropTypes.string,
+    image: PropTypes.string,
+    userSeen: PropTypes.arrayOf(PropTypes.string),
+    message: PropTypes.arrayOf(PropTypes.any),
+    createdAt: PropTypes.string,
+    updatedAt: PropTypes.string,
+  }),
+  onclick: PropTypes.func,
+};
+
+Conversation.defaultProps = {
+  conversation: {},
+  onClick: () => {},
+};

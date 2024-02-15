@@ -1,4 +1,5 @@
 import { Navigate } from "react-router-dom";
+import PropTypes from "prop-types";
 
 const ProtectAuthRoutes = ({ redirectPath, children }) => {
   return (
@@ -13,3 +14,13 @@ const ProtectAuthRoutes = ({ redirectPath, children }) => {
 };
 
 export { ProtectAuthRoutes };
+
+ProtectAuthRoutes.propTypes = {
+  redirectPath: PropTypes.string,
+  children: PropTypes.node.isRequired,
+};
+
+ProtectAuthRoutes.defaultProps = {
+  redirectPath: "",
+  children: <></>,
+};
