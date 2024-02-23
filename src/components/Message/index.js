@@ -25,14 +25,18 @@ const Message = ({
         padding="10px"
         borderRadius={
           isSender
-            ? previousSameUser === nextSameUser
-              ? "18px 4px 4px 18px"
-              : previousSameUser && !nextSameUser
+            ? previousSameUser && nextSameUser
+              ? "18px 14px 14px 18px"
+              : !previousSameUser && !nextSameUser
+              ? "18px"
+              : !previousSameUser && nextSameUser
               ? "18px 4px 18px 18px"
               : "18px 18px 4px 18px"
-            : previousSameUser === nextSameUser
-            ? "4px 18px 18px 4px"
-            : previousSameUser && !nextSameUser
+            : previousSameUser && nextSameUser
+            ? "14px 18px 18px 14px"
+            : !previousSameUser && !nextSameUser
+            ? "18px"
+            : !previousSameUser && nextSameUser
             ? "4px 18px 18px 18px"
             : "18px 18px 18px 4px"
         }

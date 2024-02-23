@@ -1,11 +1,12 @@
-import { Box, Avatar, Text } from "@chakra-ui/react";
+import { Box, Flex, Avatar, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
+import { formatDistance } from "date-fns";
 
 import { formatConversationName } from "#/utils";
 import { useContext } from "react";
 import { GlobalContext } from "#/contexts/GlobalContext";
 
-const Conversation = ({ conversation, onClick }) => {
+const Conversation = ({ conversation, isRead, isSelect, onClick }) => {
   const { user } = useContext(GlobalContext);
 
   const handleClick = () => {
@@ -20,6 +21,7 @@ const Conversation = ({ conversation, onClick }) => {
         display="flex"
         alignItems="center"
         borderRadius="15px"
+        backgroundColor={isSelect ? "rgba(0, 0, 0, 0.05)" : ""}
         _hover={{
           cursor: "pointer",
           backgroundColor: "rgba(0, 0, 0, 0.05)",
@@ -28,11 +30,23 @@ const Conversation = ({ conversation, onClick }) => {
       >
         <Avatar />
         <Box marginLeft="10px" flex={1}>
-          <Text as="b" noOfLines={1}>
-            {formatConversationName(conversation, user.id)}
-          </Text>
-          <Text fontSize="sm" color="#65676b">
-            Latest message
+          <Flex justifyContent="space-between">
+            <Text as="b" noOfLines={1} flex={1}>
+              {formatConversationName(conversation, user.id)}
+            </Text>
+            <Text fontSize="sm" color="#65676b">
+              {formatDistance(new Date(conversation?.updatedAt), new Date())}
+            </Text>
+          </Flex>
+          <Text
+            fontSize="sm"
+            as={isRead ? "" : "b"}
+            color={isRead ? "#65676b" : "black"}
+            noOfLines={1}
+          >
+            {`${user.id === conversation.latestMessage.userId ? "you: " : ""}${
+              conversation.latestMessage.content
+            }`}
           </Text>
         </Box>
       </Box>
@@ -55,14 +69,22 @@ Conversation.propTypes = {
     name: PropTypes.string,
     image: PropTypes.string,
     userSeen: PropTypes.arrayOf(PropTypes.string),
-    message: PropTypes.arrayOf(PropTypes.any),
+    latestMessage: PropTypes.shape({
+      userId: PropTypes.string,
+      content: PropTypes.string,
+      createdAt: PropTypes.string,
+    }),
     createdAt: PropTypes.string,
     updatedAt: PropTypes.string,
   }),
+  isRead: PropTypes.bool,
+  isSelect: PropTypes.bool,
   onclick: PropTypes.func,
 };
 
 Conversation.defaultProps = {
   conversation: {},
+  isRead: false,
+  isSelect: false,
   onClick: () => {},
 };

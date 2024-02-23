@@ -36,12 +36,15 @@ const Login = () => {
         setLoading(false)
       );
 
-      if (response.status === 200) {
-        logIn(response.data["access_token"]);
+      if (response?.status === 200) {
+        logIn(response?.data["access_token"]);
         return navigate("/");
       }
     } catch (error) {
-      setAlertMessage(error.response.data.error.code);
+      const code = error?.response?.data?.error?.code;
+      const message = code ? code.replace("-", " ") : "something went wrong!";
+
+      setAlertMessage(message);
     }
   };
 
@@ -75,7 +78,7 @@ const Login = () => {
               onSubmit: handleSubmit(onSignIn),
             }}
           >
-            <FormInput name="email" label="Email" />
+            <FormInput name="email" label="Email" autoFocus={true} />
             <FormInput name="password" label="Password" type="password" />
             <Box textAlign="center">
               <Button type="submit" isLoading={loading}>

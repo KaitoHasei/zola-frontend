@@ -20,6 +20,7 @@ import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
 
 import { get, post } from "#/axios";
+import { chatSocket } from "#/socket";
 import { formatConversationName } from "#/utils";
 
 import { GlobalContext } from "#/contexts/GlobalContext";
@@ -35,28 +36,51 @@ function App() {
   const [conversation, setConversation] = useState([]);
   const [messages, setMessages] = useState([]);
 
+  // connect with chat socket
+  useEffect(() => {
+    if (conversationId) {
+      chatSocket.io.opts.query = {
+        conversationId,
+      };
+      chatSocket.connect();
+    }
+
+    return () => {
+      chatSocket.disconnect();
+    };
+  }, [conversationId]);
+
+  // call api get data of conversation
   useEffect(() => {
     if (conversationId) {
       get(`/conversations/${conversationId}`).then((res) =>
         setConversation(res?.data)
       );
-      get(`/conversations/${conversationId}/messages`).then((res) =>
+      get(`/conversations/${conversationId}/messages?pageSize=20`).then((res) =>
         setMessages(res?.data?.message || [])
       );
     }
   }, [conversationId]);
 
+  // handle event chat socket
+  useEffect(() => {
+    const onNewMessage = (newMessage) => {
+      if (!_.isEmpty(newMessage)) {
+        setMessages((prev) => [newMessage.message, ...prev]);
+      }
+    };
+
+    chatSocket.on("sent_message", onNewMessage);
+
+    return () => {
+      chatSocket.off("sent_message", onNewMessage);
+    };
+  }, [setMessages]);
+
   const handleSendMessage = useCallback(() => {
     const message = inputRef.current.value.trim();
 
     if (!message) return;
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        content: message,
-      },
-    ]);
 
     inputRef.current.value = "";
 
@@ -87,7 +111,7 @@ function App() {
 
     return (
       <Stack height="100%">
-        <Stack flex={1}>
+        <Stack flex={1} flexDirection="column-reverse" overflowY="scroll">
           {messages.map((item, index) => {
             const previousSameUser =
               index !== 0

@@ -34,9 +34,12 @@ const Register = () => {
         setLoading(false)
       );
 
-      if (response.status === 200) return navigate("/login");
+      if (response?.status === 200) return navigate("/login");
     } catch (error) {
-      setAlertMessage(error.response.data.error.code);
+      const code = error?.response?.data?.error?.code;
+      const message = code ? code.replace("-", " ") : "something went wrong!";
+
+      setAlertMessage(message);
     }
   };
 
@@ -70,7 +73,7 @@ const Register = () => {
               onSubmit: handleSubmit(onSignUp),
             }}
           >
-            <FormInput name="username" label="Username" />
+            <FormInput name="username" label="Username" autoFocus={true} />
             <FormInput name="email" label="Email" />
             <FormInput name="password" label="Password" type="password" />
             <Box textAlign="center">

@@ -1,7 +1,7 @@
 import { Box, Avatar, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 
-const UserSearched = ({ user, onAddFriend }) => {
+const UserSearched = ({ user, onClick }) => {
   return (
     <Box
       padding="10px"
@@ -13,6 +13,7 @@ const UserSearched = ({ user, onAddFriend }) => {
         cursor: "pointer",
         backgroundColor: "rgba(0, 0, 0, 0.05)",
       }}
+      onClick={() => onClick(user)}
     >
       <Avatar src={user?.photoUrl ? user.photoUrl : ""} />
       <Box marginLeft="10px" flex={1}>
@@ -30,7 +31,7 @@ UserSearched.propTypes = {
     displayName: PropTypes.string,
     photoUrl: PropTypes.string,
   }),
-  onAddFriend: PropTypes.func,
+  onClick: PropTypes.func,
 };
 
 UserSearched.defaultProps = {
@@ -39,5 +40,5 @@ UserSearched.defaultProps = {
     displayName: "",
     photoUrl: "",
   },
-  onAddFriend: () => {},
+  onClick: () => {},
 };

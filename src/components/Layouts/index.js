@@ -1,10 +1,18 @@
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Outlet } from "react-router-dom";
 import { Box, Heading, Input, Spinner } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
 
-import { get } from "#/axios";
+import { get, post } from "#/axios";
+import { rootSocket } from "#/socket";
 
 import { GlobalContext } from "#/contexts/GlobalContext";
 
@@ -12,44 +20,68 @@ import UserSearched from "./SearchResult";
 import ConversationList from "./ConversationList";
 
 const AppLayout = () => {
-  const { user, setUser } = useContext(GlobalContext);
+  const { user, setUser, setConversationId } = useContext(GlobalContext);
   const searchRef = useRef(null);
   const [isSearch, setSearch] = useState(false);
   const [listUser, setListUser] = useState([]);
-  const [conversations, setConversations] = useState([]);
 
+  // call api get data
   useEffect(() => {
     try {
       const getData = async () => {
         const me = await get("/users/me");
 
-        if (me.status === 200) {
+        if (me?.status === 200) {
           setUser(me?.data);
-          get("/conversations").then((res) => {
-            setConversations(res?.data?.list);
-          });
         }
       };
 
       getData();
     } catch (error) {}
-  }, [setUser, setConversations]);
+  }, [setUser]);
+
+  // connect with root socket
+  useEffect(() => {
+    rootSocket.connect();
+
+    return () => {
+      rootSocket.disconnect();
+    };
+  }, []);
 
   const handleLiveSearch = (event) => {
     const { value } = event?.target;
 
     if (!value.trim()) return;
 
-    get(`/users?email=${value}`).then((res) => {
-      setListUser(res.data?.list);
-    });
+    get(`/users?email=${value}`)
+      .then((res) => {
+        setListUser(res?.data?.list);
+      })
+      .catch((error) => {});
   };
+
+  const handleClickUserSearched = useCallback(
+    async (user) => {
+      if (_.isEmpty(user)) return;
+
+      try {
+        const response = await post("/conversations", {
+          participantId: user?.id,
+        });
+
+        if (response?.status === 201)
+          return setConversationId(response?.data?.id);
+      } catch (error) {}
+    },
+    [setConversationId]
+  );
 
   const debounceLiveSearch = _.debounce(handleLiveSearch, 300);
 
   const renderMainSidebar = useMemo(() => {
     const viewByPath = {
-      "/": () => <ConversationList conversations={conversations} />,
+      "/": () => <ConversationList />,
     };
 
     return (
@@ -58,7 +90,11 @@ const AppLayout = () => {
           <Box flex={1} overflowY="scroll">
             {listUser &&
               listUser?.map((user, index) => (
-                <UserSearched key={index} user={user} />
+                <UserSearched
+                  key={index}
+                  user={user}
+                  onClick={handleClickUserSearched}
+                />
               ))}
           </Box>
         ) : (
@@ -66,7 +102,7 @@ const AppLayout = () => {
         )}
       </>
     );
-  }, [isSearch, listUser, conversations]);
+  }, [isSearch, listUser, handleClickUserSearched]);
 
   return (
     <>
@@ -76,7 +112,29 @@ const AppLayout = () => {
         </Box>
       ) : (
         <Box height="100%" display="flex">
-          <Box width={"60px"} border="1px solid #e5e5e5"></Box>
+          <Box
+            width={"60px"}
+            padding="10px 5px"
+            display="flex"
+            flexDirection="column"
+            border="1px solid #e5e5e5"
+          >
+            <Box
+              width="100%"
+              aspectRatio={1}
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              fontSize="28px"
+              borderRadius="10px"
+              _hover={{
+                cursor: "pointer",
+                backgroundColor: "rgba(0, 0, 0, 0.05)",
+              }}
+            >
+              <Icon icon="bi:chat-fill" />
+            </Box>
+          </Box>
           <Box
             width={"360px"}
             display="flex"
