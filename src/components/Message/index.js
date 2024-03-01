@@ -11,7 +11,7 @@ const Message = ({
   return (
     <Flex
       justifyContent={isSender ? "end" : "start"}
-      alignItems="center"
+      alignItems="start"
       flexDirection={isSender ? "row-reverse" : "row"}
     >
       <Avatar
@@ -26,14 +26,14 @@ const Message = ({
         borderRadius={
           isSender
             ? previousSameUser && nextSameUser
-              ? "18px 14px 14px 18px"
+              ? "18px 8px 8px 18px"
               : !previousSameUser && !nextSameUser
               ? "18px"
               : !previousSameUser && nextSameUser
               ? "18px 4px 18px 18px"
               : "18px 18px 4px 18px"
             : previousSameUser && nextSameUser
-            ? "14px 18px 18px 14px"
+            ? "8px 18px 18px 8px"
             : !previousSameUser && !nextSameUser
             ? "18px"
             : !previousSameUser && nextSameUser

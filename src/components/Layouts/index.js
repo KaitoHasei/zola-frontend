@@ -12,15 +12,17 @@ import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
 
 import { get, post } from "#/axios";
-import { rootSocket } from "#/socket";
+import { getSocket } from "#/socket";
 
 import { GlobalContext } from "#/contexts/GlobalContext";
+import { SocketContext } from "#/contexts/SocketContext";
 
 import UserSearched from "./SearchResult";
 import ConversationList from "./ConversationList";
 
 const AppLayout = () => {
   const { user, setUser, setConversationId } = useContext(GlobalContext);
+  const { setSocket } = useContext(SocketContext);
   const searchRef = useRef(null);
   const [isSearch, setSearch] = useState(false);
   const [listUser, setListUser] = useState([]);
@@ -42,12 +44,24 @@ const AppLayout = () => {
 
   // connect with root socket
   useEffect(() => {
-    rootSocket.connect();
+    const rootSocket = getSocket("", { autoConnect: false });
+
+    if (!_.isEmpty(user)) {
+      rootSocket.connect();
+      setSocket((prev) => {
+        const socket = _.cloneDeep(prev);
+
+        return {
+          ...socket,
+          rootSocket,
+        };
+      });
+    }
 
     return () => {
       rootSocket.disconnect();
     };
-  }, []);
+  }, [user, setSocket]);
 
   const handleLiveSearch = (event) => {
     const { value } = event?.target;

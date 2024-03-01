@@ -6,12 +6,13 @@ import _ from "lodash";
 import { GlobalContext } from "#/contexts/GlobalContext";
 
 import { get } from "#/axios";
-import { rootSocket } from "#/socket";
 
 import Conversation from "#/components/Conversation";
+import { SocketContext } from "#/contexts/SocketContext";
 
 const ConversationList = () => {
   const { user, conversationId, setConversationId } = useContext(GlobalContext);
+  const { socket } = useContext(SocketContext);
   const [conversations, setConversations] = useState([]);
 
   useEffect(() => {
@@ -43,12 +44,12 @@ const ConversationList = () => {
       return setConversations((prev) => [data, ...prev]);
     };
 
-    rootSocket.on("conversation_updated", onConversationUpdated);
+    socket.rootSocket?.on("conversation_updated", onConversationUpdated);
 
     return () => {
-      rootSocket.off("conversation_updated", onConversationUpdated);
+      socket.rootSocket?.off("conversation_updated", onConversationUpdated);
     };
-  }, [conversations, setConversations]);
+  }, [socket.rootSocket, conversations, setConversations]);
 
   const handleClickConversation = (conversationId) => {
     setConversationId(conversationId);

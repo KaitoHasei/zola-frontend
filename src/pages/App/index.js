@@ -20,7 +20,7 @@ import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
 
 import { get, post } from "#/axios";
-import { chatSocket } from "#/socket";
+import { getSocket } from "#/socket";
 import { formatConversationName } from "#/utils";
 
 import { GlobalContext } from "#/contexts/GlobalContext";
@@ -29,26 +29,39 @@ import FeedLayout from "#/components/Layouts/FeedLayout";
 import Message from "#/components/Message";
 
 import "./App.scss";
+import { SocketContext } from "#/contexts/SocketContext";
 
 function App() {
   const { user, conversationId } = useContext(GlobalContext);
+  const { socket, setSocket } = useContext(SocketContext);
   const inputRef = useRef(null);
   const [conversation, setConversation] = useState([]);
   const [messages, setMessages] = useState([]);
 
   // connect with chat socket
   useEffect(() => {
-    if (conversationId) {
-      chatSocket.io.opts.query = {
+    const chatSocket = getSocket("/chats", {
+      autoConnect: false,
+      forceNew: true,
+      query: {
         conversationId,
-      };
+      },
+    });
+
+    if (conversationId) {
       chatSocket.connect();
+      setSocket((prev) => {
+        return {
+          ...prev,
+          chatSocket,
+        };
+      });
     }
 
     return () => {
       chatSocket.disconnect();
     };
-  }, [conversationId]);
+  }, [conversationId, setSocket]);
 
   // call api get data of conversation
   useEffect(() => {
@@ -70,12 +83,12 @@ function App() {
       }
     };
 
-    chatSocket.on("sent_message", onNewMessage);
+    socket.chatSocket?.on("sent_message", onNewMessage);
 
     return () => {
-      chatSocket.off("sent_message", onNewMessage);
+      socket.chatSocket?.off("sent_message", onNewMessage);
     };
-  }, [setMessages]);
+  }, [socket.chatSocket, setMessages]);
 
   const handleSendMessage = useCallback(() => {
     const message = inputRef.current.value.trim();

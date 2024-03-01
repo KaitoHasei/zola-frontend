@@ -5,6 +5,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import reportWebVitals from "./reportWebVitals";
 
 import { GlobalProvider } from "./contexts/GlobalContext";
+import { SocketProvider } from "./contexts/SocketContext";
 import Router from "./pages";
 import { theme } from "./libs";
 
@@ -15,7 +16,9 @@ root.render(
   <React.StrictMode>
     <ChakraProvider theme={theme}>
       <GlobalProvider>
-        <Router />
+        <SocketProvider>
+          <Router />
+        </SocketProvider>
       </GlobalProvider>
     </ChakraProvider>
   </React.StrictMode>
