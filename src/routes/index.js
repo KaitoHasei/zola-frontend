@@ -4,6 +4,7 @@ import App from "#/pages/App";
 import Login from "#/pages/Login";
 import Register from "#/pages/Register";
 import NotFound from "#/pages/404";
+import Verification from "#/pages/Verification";
 
 export const routes = [
   {
@@ -32,5 +33,13 @@ export const routes = [
         <Register />
       </ProtectAuthRoutes>
     ),
+  },
+  {
+    path: "/verification",
+    element : (
+      <ProtectAuthRoutes redirectPath="/">
+        <Verification/>
+      </ProtectAuthRoutes>
+    ) 
   },
 ];

@@ -5,6 +5,7 @@ export const GlobalContext = createContext();
 export const GlobalProvider = ({ children }) => {
   const [user, setUser] = useState({});
   const [conversationId, setConversationId] = useState("");
+  const [ accessToken, setAccessToken] = useState("")
 
   const logIn = (token = "") => {
     if (!token.trim()) return;
@@ -26,6 +27,8 @@ export const GlobalProvider = ({ children }) => {
         setConversationId,
         logIn,
         logOut,
+        accessToken,
+        setAccessToken
       }}
     >
       {children}

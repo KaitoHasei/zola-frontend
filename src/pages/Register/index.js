@@ -34,11 +34,12 @@ const Register = () => {
         setLoading(false)
       );
 
-      if (response?.status === 200) return navigate("/login");
+      if (response?.status === 200) 
+      return navigate("/login");
     } catch (error) {
       const code = error?.response?.data?.error?.code;
       const message = code ? code.replace("-", " ") : "something went wrong!";
-
+      
       setAlertMessage(message);
     }
   };

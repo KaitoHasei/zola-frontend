@@ -25,7 +25,7 @@ const Login = () => {
     setValue,
     handleSubmit,
   } = useForm();
-  const { logIn } = useContext(GlobalContext);
+  const { logIn, setUser, setAccessToken } = useContext(GlobalContext);
   const [loading, setLoading] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
@@ -37,8 +37,18 @@ const Login = () => {
       );
 
       if (response?.status === 200) {
-        logIn(response?.data["access_token"]);
-        return navigate("/");
+        const currentUser = response.data.currentUser;
+
+        /* logIn(response?.data["access_token"]); */
+        console.log("data :", response?.data)
+        setUser(currentUser)
+        setAccessToken(response.data["access_token"])
+        if (currentUser.emailVerified) {
+          logIn(response?.data["access_token"]);
+          return navigate("/");
+        } else {
+          return navigate("/verification");
+        }
       }
     } catch (error) {
       const code = error?.response?.data?.error?.code;
