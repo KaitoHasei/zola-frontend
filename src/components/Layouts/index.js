@@ -19,6 +19,7 @@ import { SocketContext } from "#/contexts/SocketContext";
 
 import UserSearched from "./SearchResult";
 import ConversationList from "./ConversationList";
+import ModelUser from "../ModelUser";
 
 const AppLayout = () => {
   const { user, setUser, setConversationId } = useContext(GlobalContext);
@@ -137,6 +138,7 @@ const AppLayout = () => {
               width="100%"
               aspectRatio={1}
               display="flex"
+              flexDirection="column"
               justifyContent="center"
               alignItems="center"
               fontSize="28px"
@@ -146,7 +148,8 @@ const AppLayout = () => {
                 backgroundColor: "rgba(0, 0, 0, 0.05)",
               }}
             >
-              <Icon icon="bi:chat-fill" />
+              <ModelUser user={user}/>
+              {/* <Icon icon="bi:chat-fill" /> */}
             </Box>
           </Box>
           <Box

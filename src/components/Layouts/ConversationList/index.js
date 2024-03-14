@@ -23,25 +23,25 @@ const ConversationList = () => {
       .catch((error) => {});
   }, []);
 
-  useEffect(() => {
-    const onConversationUpdated = (data) => {
-      if (_.isEmpty(data)) return;
+  useEffect(() => { 
+    const onConversationUpdated = (data) => { 
+      if (_.isEmpty(data)) return; 
 
-      const indexOfConversation = conversations.findIndex(
-        (element) => element.id === data?.id
-      );
+      const indexOfConversation = conversations.findIndex( 
+        (element) => element.id === data?.id 
+      ); 
 
-      if (indexOfConversation !== -1) {
-        return setConversations((prev) => {
-          const _conversations = _.cloneDeep(prev);
+      if (indexOfConversation !== -1) { 
+        return setConversations((prev) => { 
+          const _conversations = _.cloneDeep(prev); 
 
-          _conversations.splice(indexOfConversation, 1);
+          _conversations.splice(indexOfConversation, 1); 
 
-          return [data, ..._conversations];
+          return [data, ..._conversations]; 
         });
-      }
+      } 
 
-      return setConversations((prev) => [data, ...prev]);
+      return setConversations((prev) => [data, ...prev]); 
     };
 
     socket.rootSocket?.on("conversation_updated", onConversationUpdated);
