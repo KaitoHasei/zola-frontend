@@ -2,7 +2,7 @@ import { Box, Flex, Avatar, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import { formatDistance } from "date-fns";
 
-import { formatConversationName } from "#/utils";
+import { formatConversationName, getConversationAvatar } from "#/utils";
 import { useContext } from "react";
 import { GlobalContext } from "#/contexts/GlobalContext";
 
@@ -28,7 +28,10 @@ const Conversation = ({ conversation, isRead, isSelect, onClick }) => {
         }}
         onClick={handleClick}
       >
-        <Avatar />
+        <Avatar
+          src={getConversationAvatar(conversation, user.id)}
+          bg="gray.400"
+        />
         <Box marginLeft="10px" flex={1}>
           <Flex justifyContent="space-between">
             <Text as="b" noOfLines={1} flex={1}>
@@ -45,7 +48,9 @@ const Conversation = ({ conversation, isRead, isSelect, onClick }) => {
             noOfLines={1}
           >
             {`${user.id === conversation.latestMessage.userId ? "you: " : ""}${
-              conversation.latestMessage.content
+              conversation?.latestMessage?.typeMessage === "TEXT"
+                ? conversation.latestMessage.content
+                : `Sent attached ${conversation?.latestMessage?.typeMessage?.toLowerCase()}`
             }`}
           </Text>
         </Box>
@@ -72,6 +77,7 @@ Conversation.propTypes = {
     latestMessage: PropTypes.shape({
       userId: PropTypes.string,
       content: PropTypes.string,
+      typeMessage: PropTypes.string,
       createdAt: PropTypes.string,
     }),
     createdAt: PropTypes.string,
