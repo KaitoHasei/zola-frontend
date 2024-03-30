@@ -4,7 +4,7 @@ import App from "#/pages/App";
 import Login from "#/pages/Login";
 import Register from "#/pages/Register";
 import NotFound from "#/pages/404";
-
+import RegisterSuccess from "#/pages/Register/RegisterSuccess";
 export const routes = [
   {
     path: "/",
@@ -30,6 +30,14 @@ export const routes = [
     element: (
       <ProtectAuthRoutes redirectPath="/">
         <Register />
+      </ProtectAuthRoutes>
+    ),
+  },
+  {
+    path: "/register-success",
+    element: (
+      <ProtectAuthRoutes redirectPath="/">
+        <RegisterSuccess />
       </ProtectAuthRoutes>
     ),
   },

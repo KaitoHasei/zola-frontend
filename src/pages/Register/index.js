@@ -34,7 +34,11 @@ const Register = () => {
         setLoading(false)
       );
 
-      if (response?.status === 200) return navigate("/login");
+      // if (response?.status === 200) return navigate("/login");
+
+      //Khi test bên phía Lĩnh thì status response trả về là 201 nên thêm vào điều kiện ===201
+      if (response?.status === 200 || response?.status === 201)
+        return navigate("/register-success");
     } catch (error) {
       const code = error?.response?.data?.error?.code;
       const message = code ? code.replace("-", " ") : "something went wrong!";
