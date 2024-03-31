@@ -14,4 +14,15 @@ export const formatConversationName = (conversation, userId) => {
     ?.join(", ");
 
   return conversationName;
+
+};
+
+export const getConversationAvatar = (conversation, userId) => {
+  if (conversation?.participants?.length === 2) {
+    const participants = filterListParticipants(conversation, userId);
+
+    return participants?.[0]?.photoUrl;
+  }
+
+  return "";
 };

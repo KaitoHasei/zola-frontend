@@ -21,7 +21,7 @@ import _ from "lodash";
 
 import { get, post } from "#/axios";
 import { getSocket } from "#/socket";
-import { formatConversationName } from "#/utils";
+import { formatConversationName, getConversationAvatar } from "#/utils";
 
 import { GlobalContext } from "#/contexts/GlobalContext";
 
@@ -30,12 +30,17 @@ import Message from "#/components/Message";
 
 import "./App.scss";
 import { SocketContext } from "#/contexts/SocketContext";
+import PreviewImageUpload from "#/components/PreviewImageUpload";
 
 function App() {
   const { user, conversationId } = useContext(GlobalContext);
   const { socket, setSocket } = useContext(SocketContext);
+
   const inputRef = useRef(null);
+  const selectImageRef = useRef(null);
+
   const [conversation, setConversation] = useState([]);
+  const [images, setImages] = useState([]);
   const [messages, setMessages] = useState([]);
 
   // connect with chat socket
@@ -93,20 +98,65 @@ function App() {
   const handleSendMessage = useCallback(() => {
     const message = inputRef.current.value.trim();
 
-    if (!message) return;
-
     inputRef.current.value = "";
+
+    if (!_.isEmpty(images)) {
+      const formData = new FormData();
+
+      images.forEach((item) => {
+        formData.append("images", item);
+      });
+
+      post(`/conversations/${conversationId}/images`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setImages([]);
+    }
+
+    if (!message) return;
 
     return post(`/conversations/${conversationId}/messages`, {
       content: message,
     });
-  }, [conversationId]);
+  }, [conversationId, images]);
+
+  const handleClickSelectImage = () => {
+    selectImageRef.current.click();
+  };
+
+  const handleChangeFile = (event) => {
+    setImages([...event.target.files]);
+  };
+
+  const handleAddImage = (images) => {
+    setImages((prev) => [...prev, ...images]);
+  };
+
+  const handleRemoveImage = useCallback(
+    (image) => {
+      const _images = [...images];
+      const indexOfImage = _images.findIndex((item) => {
+        return item.name === image.image.name;
+      });
+
+      _images.splice(indexOfImage, 1);
+      setImages(_images);
+    },
+    [images]
+  );
 
   const renderTitle = useMemo(() => {
     return (
       <Flex padding="10px">
         <Flex alignItems="center">
-          <Avatar size="sm" />
+          <Avatar
+            size="sm"
+            src={getConversationAvatar(conversation, user.id)}
+            bg="gray.400"
+          />
           <Text as="b" noOfLines={1} maxWidth="250px" marginLeft="10px">
             {formatConversationName(conversation, user.id)}
           </Text>
@@ -153,8 +203,47 @@ function App() {
             handleSendMessage();
           }}
         >
-          <Flex padding="10px">
-            <Input ref={inputRef} placeholder="Aa" />
+          <Flex padding="10px" alignItems="end">
+            <Box display={!_.isEmpty(images) && "none"} marginRight="10px">
+              <IconButton
+                aria-label="send-pic"
+                icon={<Icon icon="icon-park-solid:add-pic" />}
+                backgroundColor="unset"
+                borderRadius="100%"
+                fontSize="25px"
+                color="teal.500"
+                _hover={{ backgroundColor: "#e0e2e7" }}
+                onClick={handleClickSelectImage}
+              />
+              <input
+                ref={selectImageRef}
+                style={{ display: "none" }}
+                type="file"
+                multiple
+                accept="image/png, image/jpeg"
+                onChange={handleChangeFile}
+              />
+            </Box>
+            <Box
+              padding="8px"
+              flex={1}
+              backgroundColor="#edf2f7"
+              borderRadius="18px"
+            >
+              {!_.isEmpty(images) && (
+                <PreviewImageUpload
+                  images={images}
+                  onAddImage={handleAddImage}
+                  onRemoveImage={handleRemoveImage}
+                />
+              )}
+              <Input
+                ref={inputRef}
+                variant="unstyled"
+                placeholder="Aa"
+                _focus={{ borderColor: "unset", boxShadow: "unset" }}
+              />
+            </Box>
             <IconButton
               isRound={true}
               aria-label="Send"
@@ -167,7 +256,14 @@ function App() {
         </form>
       </Stack>
     );
-  }, [user, conversation, messages, handleSendMessage]);
+  }, [
+    user,
+    conversation,
+    images,
+    messages,
+    handleSendMessage,
+    handleRemoveImage,
+  ]);
 
   return (
     <>
