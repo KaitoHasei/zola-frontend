@@ -4,6 +4,9 @@ import App from "#/pages/App";
 import Login from "#/pages/Login";
 import Register from "#/pages/Register";
 import NotFound from "#/pages/404";
+import Contact from "#/pages/Contact";
+import Setting from "#/pages/Setting";
+import UpdateAccountUser from "#/pages/UpdateAccountUser";
 
 export const routes = [
   {
@@ -14,6 +17,18 @@ export const routes = [
       {
         path: "",
         element: <App />,
+      },
+      {
+        path: "/contact",
+        element: <Contact />,
+      },
+      {
+        path: "/setting",
+        element: <Setting />,
+      },
+      {
+        path: "/account",
+        element: <UpdateAccountUser />
       },
     ],
   },

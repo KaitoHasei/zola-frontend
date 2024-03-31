@@ -6,8 +6,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { Outlet } from "react-router-dom";
-import { Box, Heading, Input, Spinner } from "@chakra-ui/react";
+import { FcBusinessContact } from "react-icons/fc";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Box, Button, Heading, Input, Spinner } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
 
@@ -20,13 +21,20 @@ import { SocketContext } from "#/contexts/SocketContext";
 import UserSearched from "./SearchResult";
 import ConversationList from "./ConversationList";
 import ModelUser from "../ModelUser";
+import UpdateInfomationUserNav from "#/pages/SettingNav/index.js";
+import { FcSettings } from "react-icons/fc";
+import { FcSms } from "react-icons/fc";
+import ContactNav from "#/pages/ContactNav";
+import SettingNav from "#/pages/SettingNav/index.js";
 
 const AppLayout = () => {
+  const [title, setTitle] = useState("Chat");
   const { user, setUser, setConversationId } = useContext(GlobalContext);
   const { setSocket } = useContext(SocketContext);
   const searchRef = useRef(null);
   const [isSearch, setSearch] = useState(false);
   const [listUser, setListUser] = useState([]);
+  const [viewName, setViewName] = useState("CHAT")
 
   // call api get data
   useEffect(() => {
@@ -40,8 +48,17 @@ const AppLayout = () => {
       };
 
       getData();
-    } catch (error) {}
+    } catch (error) { }
   }, [setUser]);
+  useEffect(() => {
+    if (viewName === "CHAT") {
+      setTitle("Chat")
+    } else if (viewName === "CONTACT") {
+      setTitle("Contact")
+    } else if(viewName === "SETTING") {
+      setTitle("Account")
+    }
+  }, [viewName])
 
   // connect with root socket
   useEffect(() => {
@@ -73,7 +90,9 @@ const AppLayout = () => {
       .then((res) => {
         setListUser(res?.data?.list);
       })
-      .catch((error) => {});
+      .catch((error) => {
+        console.error("Error handle search : ", error);
+       });
   };
 
   const handleClickUserSearched = useCallback(
@@ -87,7 +106,9 @@ const AppLayout = () => {
 
         if (response?.status === 201)
           return setConversationId(response?.data?.id);
-      } catch (error) {}
+      } catch (error) {
+        console.log("Error handle searching : ", error)
+       }
     },
     [setConversationId]
   );
@@ -96,7 +117,9 @@ const AppLayout = () => {
 
   const renderMainSidebar = useMemo(() => {
     const viewByPath = {
-      "/": () => <ConversationList />,
+      "CHAT": () => <ConversationList />,
+      "CONTACT": () => <ContactNav />,
+      "SETTING": () => <SettingNav/>
     };
 
     return (
@@ -113,11 +136,11 @@ const AppLayout = () => {
               ))}
           </Box>
         ) : (
-          <>{viewByPath[window.location.pathname]()}</>
+          <>{viewByPath[viewName]()}</>
         )}
       </>
     );
-  }, [isSearch, listUser, handleClickUserSearched]);
+  }, [isSearch, listUser, viewName, handleClickUserSearched]);
 
   return (
     <>
@@ -138,19 +161,83 @@ const AppLayout = () => {
               width="100%"
               aspectRatio={1}
               display="flex"
-              flexDirection="column"
               justifyContent="center"
               alignItems="center"
               fontSize="28px"
-              borderRadius="10px"
               _hover={{
                 cursor: "pointer",
                 backgroundColor: "rgba(0, 0, 0, 0.05)",
               }}
+              marginBottom={4}
+              paddingBottom={4}
+              borderBottom={2}
+              borderBottomColor="black"
+              borderBottomWidth="100%"
+              borderBottomStyle="inherit"
             >
-              <ModelUser user={user}/>
-              {/* <Icon icon="bi:chat-fill" /> */}
+              <ModelUser user={user} />
             </Box>
+            <Link to="/">  {/* ????? */}
+              <Box
+                width="100%"
+                aspectRatio={1}
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                fontSize="28px"
+                borderRadius="10px"
+                backgroundColor={viewName==="CHAT"?"rgba(0, 0, 0, 0.05)":null}
+                onClick={() => {setViewName("CHAT") }}
+                _hover={{
+                  cursor: "pointer",
+                  backgroundColor: "rgba(0, 0, 0, 0.05)",
+                }}
+                marginBottom={4}
+              >
+                <Icon icon="bi:chat-fill" />
+              </Box>
+            </Link>
+            <Link to="/contact"> {/* ?????? */}
+              <Box
+                width="100%"
+                aspectRatio={1}
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                borderRadius="10px"
+                bg="rgba(255, 255, 255, 0.3)"
+                _hover={{
+                  cursor: "pointer",
+                  backgroundColor: "rgba(0, 0, 0, 0.05)",
+                }}
+                backgroundColor={viewName==="CONTACT"?"rgba(0, 0, 0, 0.05)":null}
+                padding={1}
+                marginBottom={4}
+                onClick={()=>setViewName("CONTACT")}
+              >
+                <Icon icon="lucide:contact" width="100%" height="100%"/>
+              </Box>
+            </Link>
+            <Link to="/setting">
+              <Box
+                width="100%"
+                aspectRatio={1}
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                borderRadius="10px"
+                backgroundColor={viewName==="SETTING"?"rgba(0, 0, 0, 0.05)":null}
+                _hover={{
+                  cursor: "pointer",
+                  backgroundColor: "rgba(0, 0, 0, 0.05)",
+                }}
+                padding={1}
+                marginBottom={4}
+                onClick={()=>setViewName("SETTING")}
+              >
+                <Icon icon="ic:round-settings" width="100%" height="100%"/>
+              </Box>
+            </Link>
           </Box>
           <Box
             width={"360px"}
@@ -163,7 +250,7 @@ const AppLayout = () => {
               paddingY="5px"
               borderBottom="1px solid #e5e5e5"
             >
-              <Heading size="lg">Chat</Heading>
+              <Heading size="lg">{title}</Heading>
               <Box display="flex" alignItems="center">
                 {isSearch && (
                   <Box

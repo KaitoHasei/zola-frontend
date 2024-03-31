@@ -25,7 +25,7 @@ export const GlobalProvider = ({ children }) => {
         setUser,
         setConversationId,
         logIn,
-        logOut,
+        logOut
       }}
     >
       {children}
