@@ -4,9 +4,11 @@ import App from "#/pages/App";
 import Login from "#/pages/Login";
 import Register from "#/pages/Register";
 import NotFound from "#/pages/404";
-import Contact from "#/pages/Contact";
 import Setting from "#/pages/Setting";
-import UpdateAccountUser from "#/pages/UpdateAccountUser";
+import ListFriend from "#/pages/ListFriend";
+import SettingAccount from "#/pages/SettingAccount";
+import ListGroup from "#/pages/ListGroup";
+import FriendRequest from "#/pages/FriendRequest";
 
 export const routes = [
   {
@@ -19,17 +21,26 @@ export const routes = [
         element: <App />,
       },
       {
-        path: "/contact",
-        element: <Contact />,
+        path: "/list-friend",
+        element: <ListFriend />,
       },
       {
         path: "/setting",
         element: <Setting />,
       },
       {
-        path: "/account",
-        element: <UpdateAccountUser />
+        path: "/setting-account",
+        element: <SettingAccount />
       },
+      {
+        path: "/list-group",
+        element: <ListGroup/>
+      },
+      {
+        path: "/list-friend-request",
+        element: <FriendRequest/>
+      }
+
     ],
   },
   {

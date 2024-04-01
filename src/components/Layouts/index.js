@@ -6,9 +6,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { FcBusinessContact } from "react-icons/fc";
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Box, Button, Heading, Input, Spinner } from "@chakra-ui/react";
+import { Link, Outlet} from "react-router-dom";
+import { Box, Heading, Input, Spinner } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
 
@@ -21,11 +20,8 @@ import { SocketContext } from "#/contexts/SocketContext";
 import UserSearched from "./SearchResult";
 import ConversationList from "./ConversationList";
 import ModelUser from "../ModelUser";
-import UpdateInfomationUserNav from "#/pages/SettingNav/index.js";
-import { FcSettings } from "react-icons/fc";
-import { FcSms } from "react-icons/fc";
-import ContactNav from "#/pages/ContactNav";
-import SettingNav from "#/pages/SettingNav/index.js";
+import ContactNav from "#/components/ContactNav";
+import SettingNav from "#/components/SettingNav/index.js";
 
 const AppLayout = () => {
   const [title, setTitle] = useState("Chat");
@@ -197,7 +193,7 @@ const AppLayout = () => {
                 <Icon icon="bi:chat-fill" />
               </Box>
             </Link>
-            <Link to="/contact"> {/* ?????? */}
+            <Link to="/list-friend"> {/* ?????? */}
               <Box
                 width="100%"
                 aspectRatio={1}
@@ -218,7 +214,7 @@ const AppLayout = () => {
                 <Icon icon="lucide:contact" width="100%" height="100%"/>
               </Box>
             </Link>
-            <Link to="/setting">
+            <Link to="/setting-account">
               <Box
                 width="100%"
                 aspectRatio={1}

@@ -1,0 +1,4 @@
+export const CONTACT_LIST_FRIEND = "LIST_F";
+export const CONTACT_LIST_GROUP = "LIST_G";
+export const CONTACT_LIST_FRIEND_REQUEST= "LIST_FR";
+

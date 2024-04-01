@@ -12,12 +12,17 @@ const ModelUser = ({ user }) => {
   const [displayName, setDisplayName] = useState(user?.displayName || "")
   const [dob, setDob] = useState(user?.dob || "**/**/****")
   const [bio, setBio] = useState(user?.bio || "")
+  const [loading, setLoading] = useState(false);
+
 
   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  const updateUser = async (userId, dataChange) =>{
+  const updateUser = async (payload) =>{
+    setLoading(true);
     try {
-      const res = await post(`/users/${userId}`, dataChange);
+      const res = await put(`/users`, payload).finally(()=>{
+        setLoading(false);
+      });
       return res.data;
     } catch(error) {
       throw error;
