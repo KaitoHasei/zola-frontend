@@ -1,10 +1,11 @@
 import { Box, Heading, Text } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+
 export default function RegisterSuccess() {
   const navigate = useNavigate();
   const [countdown, setCountdown] = useState(15);
-  //More effiecient way to handle countdown, Tks to @KaitoHasei for the suggestion :))))
+
   useEffect(() => {
     const timer = setTimeout(() => {
       console.log("rendered ");
@@ -95,40 +96,3 @@ export default function RegisterSuccess() {
     </Box>
   );
 }
-
-//Another way to handle countdown
-// const countdownTimer = () => {
-//   setTimeout(() => {
-//     if (countdown === 0) {
-//       navigate("/login");
-//     } else {
-//       setCountdown((prevCountdown) => prevCountdown - 1);
-//     }
-//   }, 1000);
-// };
-
-// React.useEffect(() => {
-//   console.log("rerendered");
-//   countdownTimer();
-// }, [countdown, navigate]);
-
-//The old way to handle countdown, it cost more rerender and performance issue.
-
-// useEffect(() => {
-//   const timer = setInterval(() => {
-//     console.log("Countdown rerendered ");
-//     setCountdown((prevCountdown) => prevCountdown - 1);
-//   }, 1000);
-
-//   return () => {
-//     console.log("unmounting");
-//     clearInterval(timer);
-//   };
-// }, []);
-
-// useEffect(() => {
-//   console.log("Countdown navigate ");
-//   if (countdown === 0) {
-//     navigate("/login");
-//   }
-// }, [countdown, navigate]);
