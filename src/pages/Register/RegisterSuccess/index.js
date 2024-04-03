@@ -1,25 +1,30 @@
-import { Box, Heading, Text } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link as ReactRouterLink } from "react-router-dom";
+import { Box, Heading, Text, Link } from "@chakra-ui/react";
+
+import RegisterSuccessSVG from "#/assets/images/RegisterSuccess.svg";
+
 export default function RegisterSuccess() {
   const navigate = useNavigate();
   const [countdown, setCountdown] = useState(15);
+
   //More effiecient way to handle countdown, Tks to @KaitoHasei for the suggestion :))))
   useEffect(() => {
-    const timer = setTimeout(() => {
-      console.log("rendered ");
-      if (countdown === 0) {
-        navigate("/login");
-      } else {
-        setCountdown((prevCountdown) => prevCountdown - 1);
-      }
+    const timerInterval = setInterval(() => {
+      setCountdown((prevTime) => {
+        if (prevTime === 0) {
+          clearInterval(timerInterval);
+          navigate("/login");
+          return 0;
+        } else {
+          return prevTime - 1;
+        }
+      });
     }, 1000);
 
-    return () => {
-      console.log("unmounting");
-      clearTimeout(timer);
-    };
-  }, [countdown, navigate]);
+    // Cleanup the interval when the component unmounts
+    return () => clearInterval(timerInterval);
+  }, []);
 
   return (
     <Box
@@ -53,7 +58,10 @@ export default function RegisterSuccess() {
         </Heading>
         <Text mb="4">Please check your email to verify your account</Text>
         <Text mb="4">
-          If you are not redirected, click <Link to="/login">here</Link>
+          If you are not redirected, click{" "}
+          <Link as={ReactRouterLink} to="/login" color="teal.500">
+            here
+          </Link>
         </Text>
       </Box>
       <Box
@@ -63,10 +71,7 @@ export default function RegisterSuccess() {
         flexDirection="column"
         justifyContent="center"
       >
-        <img
-          src={require("../../../assets/images/RegisterSuccess.svg").default}
-          alt="Register Success"
-        />
+        <img src={RegisterSuccessSVG} alt="Register Success" />
       </Box>
       <img
         style={{
