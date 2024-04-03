@@ -1,17 +1,17 @@
 import { post, put } from "#/axios";
-import { Avatar, Box, Button, Input, InputGroup, InputRightElement, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, Textarea, Tooltip, useDisclosure } from "@chakra-ui/react";
-import { Icon } from "@iconify-icon/react";
-import { useEffect, useState } from "react";
+import { GlobalContext } from "#/contexts/GlobalContext";
+import { Avatar, Box, Button, Input, InputGroup, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, Textarea, Tooltip, useDisclosure } from "@chakra-ui/react";
+import { useContext, useEffect, useState } from "react";
 
-const ModelUser = ({ user }) => {
-  const [data, setData] = useState(user);
+const ModelUser = () => {
+  const {user, setUser} = useContext(GlobalContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [newAvt, setNewAvt] = useState(null);
   const [edit, setEdit] = useState(false);
-  const [avtUrl, setAvtUrl] = useState(data?.photoUrl || "");
-  const [displayName, setDisplayName] = useState(data?.displayName || "");
-  const [dob, setDob] = useState(data?.dob);
-  const [bio, setBio] = useState(data?.bio || "");
+  const [avtUrl, setAvtUrl] = useState(user?.photoUrl || "");
+  const [displayName, setDisplayName] = useState(user?.displayName || "");
+  const [dob, setDob] = useState(user?.dob);
+  const [bio, setBio] = useState(user?.bio || "");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -20,10 +20,10 @@ const ModelUser = ({ user }) => {
 
   const handleModelClose = () => {
     if (edit) {
-      setAvtUrl(data?.photoUrl || "");
-      setDisplayName(data?.displayName || "");
-      setDob(data?.dob);
-      setBio(data?.bio || "");
+      setAvtUrl(user?.photoUrl || "");
+      setDisplayName(user?.displayName || "");
+      setDob(user?.dob);
+      setBio(user.bio);
       setEdit(false);
       onClose();
     }
@@ -36,8 +36,7 @@ const ModelUser = ({ user }) => {
   };
 
   const handleUpdateAvt = async () => {
-    if(avtUrl!== data.photoUrl) {
-      /* post('/users/avatar', newAvt) */
+    if(avtUrl !== user.photoUrl) {
       try {
         const response = await post('/users/avatar', newAvt);
         if(response?.status === 200) {
@@ -54,12 +53,11 @@ const ModelUser = ({ user }) => {
     }
   }
   const handleUpdateUserInfo = async() => {
-    setLoading(true);
     const upImage = handleUpdateAvt();
     if(upImage) {
       try {
         const data = {
-          avtUrl: avtUrl,
+          photoUrl: avtUrl,
           displayName: displayName,
           dob: dob,
           bio: bio
@@ -69,8 +67,9 @@ const ModelUser = ({ user }) => {
           setLoading(false);
         })
         if(respone.status === 200) {
-          setData(respone.userUpdated);
-          console.log("Update suscces");
+          setUser(respone.data.userUpdated);
+          console.log("Update suscces : ", respone);
+          console.log("New user  : ", respone.data.userUpdated);
         }
       } catch (error) {
         console.log("Error : ", error);
@@ -78,7 +77,7 @@ const ModelUser = ({ user }) => {
     } else {
       console.log("Error upload image")
     }
-    onClose();
+    /* onClose(); */
   };
   return (
     <>
@@ -148,7 +147,7 @@ const ModelUser = ({ user }) => {
                 <Input
                   pr='4.5rem'
                   value={dob}
-                  type={edit ? "date" : "text"}
+                  type="date"
                   onChange={(e) => setDob(e.target.value)}
                 />
               </InputGroup>

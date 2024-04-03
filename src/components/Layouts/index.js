@@ -154,7 +154,7 @@ const AppLayout = () => {
               }}
               marginBottom={4}
             >
-              <ModelUser user={user} />
+              <ModelUser />
             </Box>
             <Link to="/">
               <Box
