@@ -1,10 +1,11 @@
+import CustomAlert from "#/CustomAlert";
 import { post, put } from "#/axios";
 import { GlobalContext } from "#/contexts/GlobalContext";
 import { Avatar, Box, Button, Input, InputGroup, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, Textarea, Tooltip, useDisclosure } from "@chakra-ui/react";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 
 const ModelUser = () => {
-  const {user, setUser} = useContext(GlobalContext);
+  const { user, setUser } = useContext(GlobalContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [newAvt, setNewAvt] = useState(null);
   const [edit, setEdit] = useState(false);
@@ -12,19 +13,23 @@ const ModelUser = () => {
   const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [dob, setDob] = useState(user?.dob);
   const [bio, setBio] = useState(user?.bio || "");
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setEdit(true);
-  }, [avtUrl, displayName, dob, bio])
+  const [isLoading, setIsLoading] = useState(false);
+  const [alt, setAlt] = useState(false);
+  const [mess, setMess] = useState('');
+  const [statusMess, setStatusMess] = useState('info');
 
   const handleModelClose = () => {
+    setAlt(false);
+    setMess("");
+    setStatusMess('info');
     if (edit) {
       setAvtUrl(user?.photoUrl || "");
       setDisplayName(user?.displayName || "");
       setDob(user?.dob);
       setBio(user.bio);
       setEdit(false);
+      onClose();
+    } else {
       onClose();
     }
   }
@@ -36,14 +41,13 @@ const ModelUser = () => {
   };
 
   const handleUpdateAvt = async () => {
-    if(avtUrl !== user.photoUrl) {
+    if (avtUrl !== user.photoUrl) {
       try {
         const response = await post('/users/avatar', newAvt);
-        if(response?.status === 200) {
+        if (response?.status === 200) {
           setAvtUrl(response.photoUrl);
           return true;
-        } else
-          return false;
+        }
       } catch (error) {
         const code = error?.response?.data?.error?.code;
         const message = code ? code.replace("-", " ") : "something went wrong!";
@@ -52,9 +56,10 @@ const ModelUser = () => {
       }
     }
   }
-  const handleUpdateUserInfo = async() => {
+  const handleUpdateUserInfo = async () => {
+    setIsLoading(true);
     const upImage = handleUpdateAvt();
-    if(upImage) {
+    if (upImage) {
       try {
         const data = {
           photoUrl: avtUrl,
@@ -63,21 +68,39 @@ const ModelUser = () => {
           bio: bio
         }
         console.log("Data form : ", data);
-        const respone = await put('/users/me', data).finally(()=> {
-          setLoading(false);
-        })
-        if(respone.status === 200) {
+        const respone = await put('/users/me', data);
+        if (respone.status === 200) {
           setUser(respone.data.userUpdated);
           console.log("Update suscces : ", respone);
           console.log("New user  : ", respone.data.userUpdated);
+          setAlt(true);
+          setMess("Update success !");
+          setStatusMess('success');
+          // aanr lert
+          setTimeout(() => {
+            setAlt(false);
+          }, 3000);
         }
       } catch (error) {
+        setAlt(true);
+        setMess('Update failed');
+        setStatusMess('error');
+        setTimeout(() => {
+          setAlt(false);
+        }, 3000);
         console.log("Error : ", error);
       }
     } else {
+      setAlt(true);
+      setMess('Error upload image !');
+      setStatusMess('error');
+      setTimeout(() => {
+        setAlt(false);
+      }, 3000);
       console.log("Error upload image")
     }
     /* onClose(); */
+    setIsLoading(false);
   };
   return (
     <>
@@ -167,8 +190,11 @@ const ModelUser = () => {
             </Box>
           </ModalBody>
           <ModalFooter>
-            <Button variant='ghost' style={edit?{display:'hiden'}:{}} onClick={handleUpdateUserInfo}>Update profile</Button>
+            <Button variant='ghost' onClick={handleUpdateUserInfo}>Update profile</Button>
           </ModalFooter>
+          <Box p={2} style={{ width: "100%", height: '60px' }}>
+            {alt ? (<CustomAlert message={mess} status={statusMess} style={{ position: 'fixed', bottom: '10px', right: '10px', zIndex: '9999' }} />) : null}
+          </Box>
         </ModalContent>
       </Modal>
     </>

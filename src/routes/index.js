@@ -7,6 +7,7 @@ import NotFound from "#/pages/404";
 import ListFriend from "#/pages/ListFriend";
 import ListGroup from "#/pages/ListGroup";
 import FriendRequest from "#/pages/FriendRequest";
+import NotificationList from "#/pages/NotificationList";
 
 export const routes = [
   {
@@ -29,6 +30,10 @@ export const routes = [
       {
         path: "/list-friend-request",
         element: <FriendRequest/>
+      },
+      {
+        path: "/notification",
+        element: <NotificationList/>
       }
     ],
   },

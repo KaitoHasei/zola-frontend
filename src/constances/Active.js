@@ -6,4 +6,5 @@ export const SETTING_ACCOUNT = "SETTING_ACCOUNT"; /*  */
 export const SETTING_DISPLAY = "SETTING_DISPLAY";
 export const VIEW_CHAT = "VIEW_CHAT";
 export const VIEW_CONTACT = "VIEW_CONTACT";
+export const VIEW_NOTI = "VIEW_NOTIFICATION";
 
