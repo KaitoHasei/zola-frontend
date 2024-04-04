@@ -24,7 +24,7 @@ const MenuSetting = () => {
   }
   return (
     <>
-      <Menu placement="right-start">
+      <Menu placement="right-end">
         <MenuButton
           as={Box}
           width="100%"
@@ -39,7 +39,7 @@ const MenuSetting = () => {
           }}
           padding={1}
         >
-          <Icon icon="ic:round-settings" width="100%" height="100%" style={{ color: "#008080" }} />
+          <Icon icon="mdi-light:settings" width="100%" height="100%" style={{ color: "#008080" }} />
         </MenuButton>
         <MenuList>
           <MenuItem onClick={() => setShowAccountInfoModal(true)}>

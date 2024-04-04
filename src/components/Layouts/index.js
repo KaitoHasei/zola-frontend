@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import { Link, Outlet } from "react-router-dom";
-import { Box, Heading, Input, Spinner } from "@chakra-ui/react";
+import { Box, Heading, Input, Spinner, Tooltip } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
 
@@ -19,10 +19,11 @@ import { SocketContext } from "#/contexts/SocketContext";
 
 import UserSearched from "./SearchResult";
 import ConversationList from "./ConversationList";
-import { VIEW_CHAT, VIEW_CONTACT } from "#/constances/Active";
+import { VIEW_CHAT, VIEW_CONTACT, VIEW_NOTI } from "#/constances/Active";
 import ContactNav from "../ContactNav";
 import ModelUser from "../ModelUser";
 import MenuSetting from "./MenuSetting";
+import NotificationNav from "../NotificationNav";
 
 const AppLayout = () => {
   const { user, setUser, setConversationId } = useContext(GlobalContext);
@@ -31,7 +32,6 @@ const AppLayout = () => {
   const [isSearch, setSearch] = useState(false);
   const [listUser, setListUser] = useState([]);
   const [view, setView] = useState(VIEW_CHAT);
-  const [active, setActive] = useState(false);
 
   // call api get data
   useEffect(() => {
@@ -103,6 +103,7 @@ const AppLayout = () => {
     const viewByPath = {
       VIEW_CHAT: () => <ConversationList />,
       VIEW_CONTACT: () => <ContactNav />,
+      VIEW_NOTI : () => <NotificationNav/>,
     };
 
     return (
@@ -154,52 +155,80 @@ const AppLayout = () => {
               }}
               marginBottom={4}
             >
-              <ModelUser />
+                <ModelUser />
             </Box>
-            <Link to="/">
-              <Box
-                width="100%"
-                aspectRatio={1}
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                fontSize="28px"
-                borderRadius="10px"
-                backgroundColor={view === VIEW_CHAT ? "rgba(0, 0, 0, 0.05)" : null}
-                onClick={() => { setView(VIEW_CHAT) }}
-                _hover={{
-                  cursor: "pointer",
-                  backgroundColor: "rgba(0, 0, 0, 0.05)",
-                }}
-                marginBottom={4}
-              >
-                <Icon icon="bi:chat-fill" style={{ color: "#008080" }} />
+            <Tooltip placement='auto-start' label='Chat'>
+              <Link to="/">
+                <Box
+                  width="100%"
+                  aspectRatio={1}
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  fontSize="28px"
+                  borderRadius="10px"
+                  backgroundColor={view === VIEW_CHAT ? "rgba(0, 0, 0, 0.05)" : null}
+                  onClick={() => { setView(VIEW_CHAT) }}
+                  _hover={{
+                    cursor: "pointer",
+                    backgroundColor: "rgba(0, 0, 0, 0.05)",
+                  }}
+                  marginBottom={4}
+                >
+                  <Icon icon="et:chat" style={{ color: "#008080" }} />
+                </Box>
+              </Link>
+            </Tooltip>
+            <Tooltip placement='auto-start' label='Contact manager'>
+              <Link to="/list-friend">
+                <Box
+                  width="100%"
+                  aspectRatio={1}
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  borderRadius="10px"
+                  bg="rgba(255, 255, 255, 0.3)"
+                  _hover={{
+                    cursor: "pointer",
+                    backgroundColor: "rgba(0, 0, 0, 0.05)",
+                  }}
+                  backgroundColor={view === VIEW_CONTACT ? "rgba(0, 0, 0, 0.05)" : null}
+                  padding={1}
+                  marginBottom={4}
+                  onClick={() => setView(VIEW_CONTACT)}
+                >
+                  <Icon icon="system-uicons:contacts" width="100%" height="100%" style={{ color: "#008080" }} />
+                </Box>
+              </Link>
+            </Tooltip>
+            <Tooltip placement='auto-start' label='notification'>
+              <Link to="/notification">
+                <Box
+                  width="100%"
+                  aspectRatio={1}
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  fontSize="28px"
+                  borderRadius="10px"
+                  backgroundColor={view === VIEW_NOTI ? "rgba(0, 0, 0, 0.05)" : null}
+                  onClick={() => { setView(VIEW_NOTI) }}
+                  _hover={{
+                    cursor: "pointer",
+                    backgroundColor: "rgba(0, 0, 0, 0.05)",
+                  }}
+                  marginBottom={4}
+                >
+                  <Icon icon="solar:notification-unread-lines-outline" style={{ color: "#008080" }} />
+                </Box>
+              </Link>
+            </Tooltip>
+            <Tooltip placement='bottom-end' label='setting'>
+              <Box width="100%" marginBottom={4}>
+                <MenuSetting />
               </Box>
-            </Link>
-            <Link to="/list-friend">
-              <Box
-                width="100%"
-                aspectRatio={1}
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                borderRadius="10px"
-                bg="rgba(255, 255, 255, 0.3)"
-                _hover={{
-                  cursor: "pointer",
-                  backgroundColor: "rgba(0, 0, 0, 0.05)",
-                }}
-                backgroundColor={view === VIEW_CONTACT ? "rgba(0, 0, 0, 0.05)" : null}
-                padding={1}
-                marginBottom={4}
-                onClick={() => setView(VIEW_CONTACT)}
-              >
-                <Icon icon="lucide:contact" width="100%" height="100%" style={{ color: "#008080" }} />
-              </Box>
-            </Link>
-            <Box width="100%" marginBottom={4}>
-              <MenuSetting />
-            </Box>
+            </Tooltip>
           </Box>
           <Box
             width={"360px"}
