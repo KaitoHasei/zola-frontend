@@ -33,8 +33,8 @@ const Register = () => {
       const response = await post("/auth/register", payload).finally(() =>
         setLoading(false)
       );
-
-      if (response?.status === 200) return navigate("/login");
+      if (response?.status === 200 || response?.status === 201)
+        return navigate("/register-success");
     } catch (error) {
       const code = error?.response?.data?.error?.code;
       const message = code ? code.replace("-", " ") : "something went wrong!";
