@@ -1,8 +1,10 @@
 import CustomAlert from "#/CustomAlert";
 import { post } from "#/axios";
+import { GlobalContext } from "#/contexts/GlobalContext";
 import { Box, Button, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
-import { useEffect, useState } from "react";
+import { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const ChangePasswordModal = ({ isOpen, onClose }) => {
   const [oldPassword, setOldPassword] = useState("");
@@ -12,11 +14,21 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
   const [alt, setAlt] = useState(false);
   const [mess, setMess] = useState('');
   const [statusMess, setStatusMess] = useState('info');
+  const { logOut } = useContext(GlobalContext);
+  const navigate = useNavigate();
 
   const checkValid = () => {
     if (!oldPassword || !newPassword || !confirmPassword) {
       setAlt(true);
       setMess('Please enter all the required information !');
+      setStatusMess('warning');
+      setTimeout(() => {
+        setAlt(false);
+      }, 3000);
+      return false;
+    } else if (oldPassword.trim() === newPassword.trim()) {
+      setAlt(true);
+      setMess(`New password isn't match the old password!`);
       setStatusMess('warning');
       setTimeout(() => {
         setAlt(false);
@@ -51,9 +63,15 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
             setMess('Change password success !');
             setStatusMess('success');
             setTimeout(() => {
-              setAlt(false);
-            }, 3000);
-            console.log("Change password success !");
+              setAlt(true);
+              setMess('Redirect to login now !');
+              setStatusMess('info');
+              setTimeout(() => {
+                setAlt(false);
+                logOut();
+                return navigate("/login");
+              }, 2000);
+            }, 2000);
           } else if (response.status === 401) {
             setAlt(true);
             setMess('Old password is incorrect !');
@@ -61,7 +79,6 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
             setTimeout(() => {
               setAlt(false);
             }, 3000);
-            console.log("Error : ", response);
           } else if (response.status === 500) {
             setAlt(true);
             setMess('Change password failed !');
@@ -69,7 +86,6 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
             setTimeout(() => {
               setAlt(false);
             }, 3000);
-            console.log("Error : ", response)
           }
         } catch (error) {
           setAlt(true);
@@ -78,7 +94,6 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
           setTimeout(() => {
             setAlt(false);
           }, 3000);
-          console.log("Error chang password : ", error);
         }
       }
     }

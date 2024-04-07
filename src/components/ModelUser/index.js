@@ -49,9 +49,6 @@ const ModelUser = () => {
           return true;
         }
       } catch (error) {
-        const code = error?.response?.data?.error?.code;
-        const message = code ? code.replace("-", " ") : "something went wrong!";
-        console.log("error : ", message);
         return false;
       }
     }
@@ -67,12 +64,9 @@ const ModelUser = () => {
           dob: dob,
           bio: bio
         }
-        console.log("Data form : ", data);
         const respone = await put('/users/me', data);
         if (respone.status === 200) {
           setUser(respone.data.userUpdated);
-          console.log("Update suscces : ", respone);
-          console.log("New user  : ", respone.data.userUpdated);
           setAlt(true);
           setMess("Update success !");
           setStatusMess('success');
@@ -88,7 +82,6 @@ const ModelUser = () => {
         setTimeout(() => {
           setAlt(false);
         }, 3000);
-        console.log("Error : ", error);
       }
     } else {
       setAlt(true);
@@ -97,7 +90,6 @@ const ModelUser = () => {
       setTimeout(() => {
         setAlt(false);
       }, 3000);
-      console.log("Error upload image")
     }
     /* onClose(); */
     setIsLoading(false);
