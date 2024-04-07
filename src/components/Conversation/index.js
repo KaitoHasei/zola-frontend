@@ -71,8 +71,10 @@ Conversation.propTypes = {
         photoUrl: PropTypes.string,
       })
     ),
-    name: PropTypes.string,
-    image: PropTypes.string,
+    isGroup: PropTypes.bool,
+    groupName: PropTypes.string,
+    groupImage: PropTypes.string,
+    groupOwner: PropTypes.string,
     userSeen: PropTypes.arrayOf(PropTypes.string),
     latestMessage: PropTypes.shape({
       userId: PropTypes.string,
