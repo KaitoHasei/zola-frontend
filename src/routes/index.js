@@ -8,6 +8,7 @@ import ListFriend from "#/pages/ListFriend";
 import ListGroup from "#/pages/ListGroup";
 import FriendRequest from "#/pages/FriendRequest";
 import NotificationList from "#/pages/NotificationList";
+import RegisterSuccess from "#/pages/Register/RegisterSuccess";
 
 export const routes = [
   {
@@ -50,6 +51,14 @@ export const routes = [
     element: (
       <ProtectAuthRoutes redirectPath="/">
         <Register />
+      </ProtectAuthRoutes>
+    ),
+  },
+  {
+    path: "/register-success",
+    element: (
+      <ProtectAuthRoutes redirectPath="/">
+        <RegisterSuccess />
       </ProtectAuthRoutes>
     ),
   },

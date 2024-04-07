@@ -128,11 +128,17 @@ function App() {
   };
 
   const handleChangeFile = (event) => {
-    setImages([...event.target.files]);
+    const _images = [...event.target.files];
+    event.target.value = "";
+    setImages(_images.slice(0, 6));
+    console.log(event);
   };
 
   const handleAddImage = (images) => {
-    setImages((prev) => [...prev, ...images]);
+    setImages((prev) => {
+      const combineImages = [...prev, ...images];
+      return combineImages.slice(0, 6);
+    });
   };
 
   const handleRemoveImage = useCallback(

@@ -5,6 +5,7 @@ import {
   GridItem,
   Avatar,
   Flex,
+  Stack,
   Text,
   Image,
 } from "@chakra-ui/react";
@@ -43,22 +44,36 @@ const Message = ({
         overflow="hidden"
       >
         {!_.isEmpty(images) && images.length > 2 ? (
-          <Grid maxWidth="400px" templateColumns="repeat(3, 1fr)" gap="3px">
+          <Grid
+            maxWidth={{ lg: "350px", xl: "400px" }}
+            templateColumns="repeat(3, 1fr)"
+            gap="3px"
+          >
             {!_.isEmpty(images) &&
               images.map((image, index) => (
-                <GridItem key={index}>
-                  <Image height="100%" src={image} />
+                <GridItem
+                  key={index}
+                  width="100%"
+                  aspectRatio={1}
+                  overflow="hidden"
+                >
+                  <Image
+                    width="100%"
+                    height="100%"
+                    objectFit="cover"
+                    src={image}
+                  />
                 </GridItem>
               ))}
           </Grid>
         ) : (
-          <Flex maxWidth="400px" alignItems="end" gap="5px">
+          <Stack maxWidth="200px" gap="5px">
             {images.map((image, index) => (
-              <Box key={index} maxWidth="200px">
+              <Box key={index}>
                 <Image src={image} />
               </Box>
             ))}
-          </Flex>
+          </Stack>
         )}
       </Box>
     );
