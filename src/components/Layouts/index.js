@@ -103,7 +103,7 @@ const AppLayout = () => {
     const viewByPath = {
       VIEW_CHAT: () => <ConversationList />,
       VIEW_CONTACT: () => <ContactNav />,
-      VIEW_NOTI : () => <NotificationNav/>,
+      /* VIEW_NOTI : () => <NotificationNav/>, */
     };
 
     return (
@@ -202,7 +202,7 @@ const AppLayout = () => {
                 </Box>
               </Link>
             </Tooltip>
-            <Tooltip placement='auto-start' label='notification'>
+            {/* <Tooltip placement='auto-start' label='notification'>
               <Link to="/notification">
                 <Box
                   width="100%"
@@ -223,7 +223,7 @@ const AppLayout = () => {
                   <Icon icon="solar:notification-unread-lines-outline" style={{ color: "#008080" }} />
                 </Box>
               </Link>
-            </Tooltip>
+            </Tooltip> */}
             <Tooltip placement='bottom-end' label='setting'>
               <Box width="100%" marginBottom={4}>
                 <MenuSetting />
