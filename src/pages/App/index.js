@@ -131,7 +131,6 @@ function App() {
     const _images = [...event.target.files];
     event.target.value = "";
     setImages(_images.slice(0, 6));
-    console.log(event);
   };
 
   const handleAddImage = (images) => {

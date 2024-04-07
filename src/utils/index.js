@@ -5,7 +5,7 @@ export const filterListParticipants = (conversation, userId) => {
 };
 
 export const formatConversationName = (conversation, userId) => {
-  if (conversation?.name) return conversation?.name;
+  if (conversation.isGroup && conversation?.groupName) return conversation?.groupName;
 
   const listParticipants = filterListParticipants(conversation, userId);
 
