@@ -58,7 +58,7 @@ const ConversationList = () => {
   return (
     <Box flex={1} overflowY="scroll">
       {conversations.map((item, index) => {
-        const isRead = item?.userSeen.includes(user.id);
+        const isRead = item?.userSeen?.includes(user.id);
 
         return (
           <Conversation
