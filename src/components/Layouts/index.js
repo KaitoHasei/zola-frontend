@@ -6,8 +6,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { Outlet } from "react-router-dom";
-import { Box, Heading, Input, Spinner } from "@chakra-ui/react";
+import { Link, Outlet } from "react-router-dom";
+import { Box, Heading, Input, Spinner, Tooltip } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
 
@@ -19,6 +19,11 @@ import { SocketContext } from "#/contexts/SocketContext";
 
 import UserSearched from "./SearchResult";
 import ConversationList from "./ConversationList";
+import { VIEW_CHAT, VIEW_CONTACT, VIEW_NOTI } from "#/constances/Active";
+import ContactNav from "../ContactNav";
+import ModelUser from "../ModelUser";
+import MenuSetting from "./MenuSetting";
+import NotificationNav from "../NotificationNav";
 
 const AppLayout = () => {
   const { user, setUser, setConversationId } = useContext(GlobalContext);
@@ -26,6 +31,7 @@ const AppLayout = () => {
   const searchRef = useRef(null);
   const [isSearch, setSearch] = useState(false);
   const [listUser, setListUser] = useState([]);
+  const [view, setView] = useState(VIEW_CHAT);
 
   // call api get data
   useEffect(() => {
@@ -39,7 +45,7 @@ const AppLayout = () => {
       };
 
       getData();
-    } catch (error) {}
+    } catch (error) { }
   }, [setUser]);
 
   // connect with root socket
@@ -72,7 +78,7 @@ const AppLayout = () => {
       .then((res) => {
         setListUser(res?.data?.list);
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   const handleClickUserSearched = useCallback(
@@ -86,7 +92,7 @@ const AppLayout = () => {
 
         if (response?.status === 201)
           return setConversationId(response?.data?.id);
-      } catch (error) {}
+      } catch (error) { }
     },
     [setConversationId]
   );
@@ -95,7 +101,9 @@ const AppLayout = () => {
 
   const renderMainSidebar = useMemo(() => {
     const viewByPath = {
-      "/": () => <ConversationList />,
+      VIEW_CHAT: () => <ConversationList />,
+      VIEW_CONTACT: () => <ContactNav />,
+      /* VIEW_NOTI : () => <NotificationNav/>, */
     };
 
     return (
@@ -112,11 +120,12 @@ const AppLayout = () => {
               ))}
           </Box>
         ) : (
-          <>{viewByPath[window.location.pathname]()}</>
+          <>{viewByPath[view]()}</>
         )}
       </>
     );
-  }, [isSearch, listUser, handleClickUserSearched]);
+  }, [isSearch, listUser, view, handleClickUserSearched]);
+
 
   return (
     <>
@@ -140,14 +149,86 @@ const AppLayout = () => {
               justifyContent="center"
               alignItems="center"
               fontSize="28px"
-              borderRadius="10px"
               _hover={{
                 cursor: "pointer",
                 backgroundColor: "rgba(0, 0, 0, 0.05)",
               }}
+              marginBottom={4}
             >
-              <Icon icon="bi:chat-fill" />
+                <ModelUser />
             </Box>
+            <Tooltip placement='auto-start' label='Chat'>
+              <Link to="/">
+                <Box
+                  width="100%"
+                  aspectRatio={1}
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  fontSize="28px"
+                  borderRadius="10px"
+                  backgroundColor={view === VIEW_CHAT ? "rgba(0, 0, 0, 0.05)" : null}
+                  onClick={() => { setView(VIEW_CHAT) }}
+                  _hover={{
+                    cursor: "pointer",
+                    backgroundColor: "rgba(0, 0, 0, 0.05)",
+                  }}
+                  marginBottom={4}
+                >
+                  <Icon icon="et:chat" style={{ color: "#008080" }} />
+                </Box>
+              </Link>
+            </Tooltip>
+            <Tooltip placement='auto-start' label='Contact manager'>
+              <Link to="/list-friend">
+                <Box
+                  width="100%"
+                  aspectRatio={1}
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  borderRadius="10px"
+                  bg="rgba(255, 255, 255, 0.3)"
+                  _hover={{
+                    cursor: "pointer",
+                    backgroundColor: "rgba(0, 0, 0, 0.05)",
+                  }}
+                  backgroundColor={view === VIEW_CONTACT ? "rgba(0, 0, 0, 0.05)" : null}
+                  padding={1}
+                  marginBottom={4}
+                  onClick={() => setView(VIEW_CONTACT)}
+                >
+                  <Icon icon="system-uicons:contacts" width="100%" height="100%" style={{ color: "#008080" }} />
+                </Box>
+              </Link>
+            </Tooltip>
+            {/* <Tooltip placement='auto-start' label='notification'>
+              <Link to="/notification">
+                <Box
+                  width="100%"
+                  aspectRatio={1}
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  fontSize="28px"
+                  borderRadius="10px"
+                  backgroundColor={view === VIEW_NOTI ? "rgba(0, 0, 0, 0.05)" : null}
+                  onClick={() => { setView(VIEW_NOTI) }}
+                  _hover={{
+                    cursor: "pointer",
+                    backgroundColor: "rgba(0, 0, 0, 0.05)",
+                  }}
+                  marginBottom={4}
+                >
+                  <Icon icon="solar:notification-unread-lines-outline" style={{ color: "#008080" }} />
+                </Box>
+              </Link>
+            </Tooltip> */}
+            <Tooltip placement='bottom-end' label='setting'>
+              <Box width="100%" marginBottom={4}>
+                <MenuSetting />
+              </Box>
+            </Tooltip>
           </Box>
           <Box
             width={"360px"}
@@ -160,7 +241,7 @@ const AppLayout = () => {
               paddingY="5px"
               borderBottom="1px solid #e5e5e5"
             >
-              <Heading size="lg">Chat</Heading>
+              <Heading size="sm">{view === VIEW_CHAT ? "Chat" : "Contact"}</Heading>
               <Box display="flex" alignItems="center">
                 {isSearch && (
                   <Box
