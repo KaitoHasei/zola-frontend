@@ -12,6 +12,7 @@ import {
   Flex,
   Stack,
   Avatar,
+  AvatarGroup,
   Input,
   Text,
   IconButton,
@@ -157,11 +158,22 @@ function App() {
     return (
       <Flex padding="10px">
         <Flex alignItems="center">
-          <Avatar
-            size="sm"
-            src={getConversationAvatar(conversation, user.id)}
-            bg="gray.400"
-          />
+          <Box>
+            {conversation?.isGroup ? (
+              <AvatarGroup size="sm" max={3}>
+                {getConversationAvatar(conversation, user.id)?.map(
+                  (item, index) => (
+                    <Avatar key={index} src={item} />
+                  )
+                )}
+              </AvatarGroup>
+            ) : (
+              <Avatar
+                src={getConversationAvatar(conversation, user.id)}
+                bg="gray.400"
+              />
+            )}
+          </Box>
           <Text as="b" noOfLines={1} maxWidth="250px" marginLeft="10px">
             {formatConversationName(conversation, user.id)}
           </Text>
