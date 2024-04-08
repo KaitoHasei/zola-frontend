@@ -5,7 +5,8 @@ export const filterListParticipants = (conversation, userId) => {
 };
 
 export const formatConversationName = (conversation, userId) => {
-  if (conversation?.name) return conversation?.name;
+  if (conversation.isGroup && conversation?.groupName)
+    return conversation?.groupName;
 
   const listParticipants = filterListParticipants(conversation, userId);
 
@@ -17,11 +18,12 @@ export const formatConversationName = (conversation, userId) => {
 };
 
 export const getConversationAvatar = (conversation, userId) => {
+  const participants = filterListParticipants(conversation, userId);
   if (conversation?.participants?.length === 2) {
-    const participants = filterListParticipants(conversation, userId);
-
     return participants?.[0]?.photoUrl;
   }
 
-  return "";
+  const groupImage = participants?.map((item) => item?.photoUrl || "");
+
+  return groupImage;
 };

@@ -1,4 +1,4 @@
-import { Box, Flex, Avatar, Text } from "@chakra-ui/react";
+import { Box, Flex, Avatar, AvatarGroup, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import { formatDistance } from "date-fns";
 
@@ -28,10 +28,22 @@ const Conversation = ({ conversation, isRead, isSelect, onClick }) => {
         }}
         onClick={handleClick}
       >
-        <Avatar
-          src={getConversationAvatar(conversation, user.id)}
-          bg="gray.400"
-        />
+        <Box width="20%">
+          {conversation?.isGroup ? (
+            <AvatarGroup size="sm" width="100%" flexWrap="wrap-reverse" max={3}>
+              {getConversationAvatar(conversation, user.id)?.map(
+                (item, index) => (
+                  <Avatar key={index} src={item} />
+                )
+              )}
+            </AvatarGroup>
+          ) : (
+            <Avatar
+              src={getConversationAvatar(conversation, user.id)}
+              bg="gray.400"
+            />
+          )}
+        </Box>
         <Box marginLeft="10px" flex={1}>
           <Flex justifyContent="space-between">
             <Text as="b" noOfLines={1} flex={1}>
@@ -41,18 +53,22 @@ const Conversation = ({ conversation, isRead, isSelect, onClick }) => {
               {formatDistance(new Date(conversation?.updatedAt), new Date())}
             </Text>
           </Flex>
-          <Text
-            fontSize="sm"
-            as={isRead ? "" : "b"}
-            color={isRead ? "#65676b" : "black"}
-            noOfLines={1}
-          >
-            {`${user.id === conversation.latestMessage.userId ? "you: " : ""}${
-              conversation?.latestMessage?.typeMessage === "TEXT"
-                ? conversation.latestMessage.content
-                : `Sent attached ${conversation?.latestMessage?.typeMessage?.toLowerCase()}`
-            }`}
-          </Text>
+          {conversation.latestMessage && (
+            <Text
+              fontSize="sm"
+              as={isRead ? "" : "b"}
+              color={isRead ? "#65676b" : "black"}
+              noOfLines={1}
+            >
+              {`${
+                user.id === conversation.latestMessage.userId ? "you: " : ""
+              }${
+                conversation?.latestMessage?.typeMessage === "TEXT"
+                  ? conversation.latestMessage.content
+                  : `Sent attached ${conversation?.latestMessage?.typeMessage?.toLowerCase()}`
+              }`}
+            </Text>
+          )}
         </Box>
       </Box>
     </>
@@ -71,8 +87,10 @@ Conversation.propTypes = {
         photoUrl: PropTypes.string,
       })
     ),
-    name: PropTypes.string,
-    image: PropTypes.string,
+    isGroup: PropTypes.bool,
+    groupName: PropTypes.string,
+    groupImage: PropTypes.string,
+    groupOwner: PropTypes.string,
     userSeen: PropTypes.arrayOf(PropTypes.string),
     latestMessage: PropTypes.shape({
       userId: PropTypes.string,
