@@ -16,6 +16,7 @@ import {
   Input,
   Text,
   IconButton,
+  HStack,
 } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
@@ -32,7 +33,7 @@ import Message from "#/components/Message";
 import "./App.scss";
 import { SocketContext } from "#/contexts/SocketContext";
 import PreviewImageUpload from "#/components/PreviewImageUpload";
-
+import ConversationInfo from "./ConversationInfo";
 function App() {
   const { user, conversationId } = useContext(GlobalContext);
   const { socket, setSocket } = useContext(SocketContext);
@@ -291,9 +292,17 @@ function App() {
           </Text>
         </Box>
       ) : (
-        <FeedLayout height="100%" title={renderTitle}>
-          {renderFeedChild}
-        </FeedLayout>
+        <HStack height="100%" gap="0">
+          <FeedLayout height="100%" title={renderTitle} width="70%">
+            {renderFeedChild}
+          </FeedLayout>
+          <ConversationInfo
+            user={user}
+            conversation={conversation}
+            getConversationAvatar={getConversationAvatar}
+            formatConversationName={formatConversationName}
+          />
+        </HStack>
       )}
     </>
   );
