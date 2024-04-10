@@ -39,7 +39,8 @@ const SearchFriendModal = ({ isOpen, onClose, userList }) => {
           setAlt(false);
         }, 1000);
       } else if (response.status === 200) {
-        setMess('Friend requested !');
+        console.log(response);
+        setMess('Friend request is pending !');
         setStatusMess('info');
         setAlt(true);
         setTimeout(() => {

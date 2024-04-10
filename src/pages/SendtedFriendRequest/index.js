@@ -4,22 +4,33 @@ import { Icon } from '@iconify-icon/react'
 import React, { useEffect, useState } from 'react'
 import moment from 'moment';
 import CustomAlert from '#/CustomAlert';
+import FriendModal from '#/components/FriendModal';
 
-const FriendRequest = () => {
+const SentedFriendRequest = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('time');
   const [data, setData] = useState([]);
   const [alt, setAlt] = useState(false);
   const [mess, setMess] = useState('');
   const [statusMess, setStatusMess] = useState('info');
+  const [selectedFriend, setSelectedFriend] = useState(null); 
+
 
   useEffect(() => {
     getFriendRequest();
   }, []);
 
+  const handleViewInfo = (friend) => {
+    setSelectedFriend(friend); 
+    console.log("friend",friend)
+  };
+
+  const handleCloseModal = () => {
+    setSelectedFriend(null); // 
+  };
   const getFriendRequest = async () => {
     try {
-      const response = await get("/contacts/get-friends-request");
+      const response = await get("/contacts/get-friend-requested");
       if (response.status === 200) {
         setData(response.data);
         console.log("Data requested : ", response.data);
@@ -28,26 +39,28 @@ const FriendRequest = () => {
       console.log("Error get list friend requested : ", error);
     }
   }
-  const handleAceptFriend = async (id) => {
+
+  const handleCancelRequest = async(id) => {
     try {
-      const response = await post("/contacts/acept-request", { id });
-      console.log(response)
+      const response = await post("/contacts/remove-friend", { id });
       if (response.status === 200) {
-        setMess('Accept successfully !');
+        setMess('Cancel successfully !');
         setStatusMess('success');
         setAlt(true);
         setTimeout(() => {
           setAlt(false);
         }, 1000);
-        setData(sortedData.filter(item => item.id !== id))
+        getFriendRequest();
+      } else {
+        setMess('Error cancel friend !');
+        setStatusMess('error');
+        setAlt(true);
+        setTimeout(() => {
+          setAlt(false);
+        }, 1000);
       }
     } catch (error) {
-      setMess('Error accept !');
-      setStatusMess('error');
-      setAlt(true);
-      setTimeout(() => {
-        setAlt(false);
-      }, 1000);
+      console.log("Error remove friend : ", error);
     }
   }
 
@@ -85,8 +98,8 @@ const FriendRequest = () => {
         borderBottom: '1px solid gray'
       }}>
         <Flex align='center' h="60px" direction='row' color="black" p={5}>
-          <Icon icon="mdi:email-plus-outline" width='40px' height='25px' />
-          <Text >Pending Friend Requests</Text>
+          <Icon icon="material-symbols-light:schedule-send-outline-rounded" width='40px' height='25px' style={{ color: "#23b3a9" }} />
+          <Text>Sent Friend Requests List</Text>
         </Flex>
       </Box>
       <Box>
@@ -112,19 +125,19 @@ const FriendRequest = () => {
       </Box>
       <Box>
         <hr style={{ width: '100%', height: 15 }} />
-        <Text pl={5} as='b'>{`Friend request(${sortedData.length})`}</Text>
+        <Text pl={5} as='b'>{`Requested(${sortedData.length})`}</Text>
         <hr style={{ width: '100%' }} />
       </Box>
-      <Box overflowY="scroll" height="calc(100vh - 120px)">
-        <Box bg='teal.20'>
-          <Flex bg='teal.20' direction="row">
-            {sortedData.length <= 0 ?
-              (<Box w='100%' p={5}>
-                <Flex justifyContent='center' alignContent='center' >
-                  <Text textAlign='center'>Not exists new requirement !</Text>
-                </Flex>
-              </Box>) :
-              (sortedData.map(item => (
+      <Box overflowY="scroll" height="calc(100vh - 180px)">
+        {sortedData.length <= 0 ?
+          (<Box w='100%' p={5}>
+            <Flex justifyContent='center' alignContent='center' >
+              <Text textAlign='center'>Not exists new requirement !</Text>
+            </Flex>
+          </Box>) :
+          (sortedData.map(item => (
+            <Box bg='teal.20'>
+              <Flex bg='teal.20' direction="row">
                 <Box key={item.id} p={4} mt={4} borderRadius="lg" boxShadow="md" bg="white" w='100%'>
                   <Flex justifyContent='center' mx={4}>
                     <Box>
@@ -137,29 +150,32 @@ const FriendRequest = () => {
                     <Box flex="1" ml={2}>
                       <Text fontSize="sm" color="gray.500">Sent {moment(item.updatedAt).fromNow()}</Text>
                     </Box>
-                    <Button onClick={() => handleAceptFriend(item.id)} bg="teal.500" color="white" _hover={{ bg: 'teal.600' }}>
-                      Acept
+{/*                     <Button onClick={() => handleViewInfo(item.friend)} bg="teal.500" color="white" _hover={{ bg: 'teal.600' }}>
+                      info
+                    </Button> */}
+                    <Button onClick={() => handleCancelRequest(item.id)} bg="teal.500" color="white" _hover={{ bg: 'teal.600' }}>
+                      Cancle
                     </Button>
                   </Flex>
                 </Box>
-              )))
-            }
-          </Flex>
-        </Box>
-        <Box px={3}
-          style={{
-            width: "100%",
-            height: '55px',
-            position: 'fixed',
-            bottom: 0,
-            right: '10px',
-            zIndex: '9999'
-          }}>
-          {alt ? (<CustomAlert message={mess} status={statusMess} style={{ position: 'fixed', bottom: '10px', right: '10px', zIndex: '9999' }} />) : null}
-        </Box>
+              </Flex>
+            </Box>
+          )))
+        }
+      </Box>
+      <Box px={3}
+        style={{
+          width: "100%",
+          height: '55px',
+          position: 'fixed',
+          bottom: 0,
+          right: '10px',
+          zIndex: '9999'
+        }}>
+        {alt ? (<CustomAlert message={mess} status={statusMess} style={{ position: 'fixed', bottom: '10px', right: '10px', zIndex: '9999' }} />) : null}
       </Box>
     </div >
   )
 }
 
-export default FriendRequest
+export default SentedFriendRequest
