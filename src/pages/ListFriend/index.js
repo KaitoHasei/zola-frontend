@@ -18,10 +18,7 @@ const ListFriend = () => {
   const [mess, setMess] = useState('');
   const [statusMess, setStatusMess] = useState('info');
   const navigate = useNavigate();
-
-  
-  const { user, setUser, setConversationId } = useContext(GlobalContext);
-
+  const { user, setConversationId } = useContext(GlobalContext);
 
   useEffect(() => {
     getContacts();
@@ -83,8 +80,9 @@ const ListFriend = () => {
     setSortBy(type);
   };
 
-  const handleGoChat =  useCallback(
+  const handleGoChat = useCallback(
     async (id) => {
+      console.log("id", id)
       if (!user) return;
 
       try {
@@ -101,9 +99,9 @@ const ListFriend = () => {
   );
 
   const handleRemoveFriend = async (id) => {
-    try{
-      const response = await post("/contacts/remove-friend", {id});
-      if(response.status === 200) {
+    try {
+      const response = await post("/contacts/remove-friend", { id });
+      if (response.status === 200) {
         setMess('Remove successfully !');
         setStatusMess('success');
         setAlt(true);
@@ -119,14 +117,11 @@ const ListFriend = () => {
           setAlt(false);
         }, 1000);
       }
-    } catch(error) {
+    } catch (error) {
       console.log("Error remove friend : ", error);
     }
   }
 
-  const handleViewProfile = (id) => {
-
-  }
   return (
     <div style={{ height: '100vh' }}>
       {/* header */}
@@ -136,7 +131,7 @@ const ListFriend = () => {
         <Flex align='center' h="60px" direction='row' color="black" p={5} justifyContent='space-between'>
           <Box display='flex'>
             <Icon icon="mingcute:contacts-line" width='40px' height='25px' />
-            <Text>List friends</Text>
+            <Text>Friends list</Text>
           </Box>
           <Box>
             <Button onClick={handleOpenModal}><Icon icon="fluent-mdl2:add-friend" /></Button>
@@ -166,18 +161,23 @@ const ListFriend = () => {
           >Sort by name</Button>
         </Flex>
       </Box>
+      <Box>
+        <hr style={{ width: '100%', height: 15 }} />
+        <Text pl={5} as='b'>{`Friends(${sortedData.length})`}</Text>
+        <hr style={{ width: '100%' }} />
+      </Box>
       <Box overflowY="scroll" height="calc(100vh - 120px)">
-        <Box bg='teal.20'>
-          <Flex bg='teal.20' direction="row">
-            {sortedData.length <= 0 ?
-              (<Box w='100%' p={5}>
-                <Flex justifyContent='center' alignContent='center' >
-                  <Text textAlign='center'>Not exists new requirement !</Text>
-                </Flex>
-              </Box>) :
-              (sortedData.map(item => (
+        {sortedData.length <= 0 ?
+          (<Box w='100%' p={5}>
+            <Flex justifyContent='center' alignContent='center' >
+              <Text textAlign='center'>Not exists new requirement !</Text>
+            </Flex>
+          </Box>) :
+          (sortedData.map(item => (
+            <Box bg='teal.20'>
+              <Flex bg='teal.20' direction="row">
                 <Box key={item.id} p={4} mt={4} borderRadius="lg" boxShadow="md" bg="white" w='100%'>
-                  <Flex justifyContent='space-between' alignItems='center' mx={4}>
+                  <Flex justifyContent='space-between' alignItems='center' mx={4} direction='row'>
                     <Box>
                       <Avatar src={item.friend.photoUrl} style={{ border: '1px solid #008080', maxWidth: '48px', maxHeight: '48px' }} />
                     </Box>
@@ -189,15 +189,9 @@ const ListFriend = () => {
                       <Button
                         aria-label="Chat"
                         colorScheme="teal"
-                        onClick={() => handleGoChat(item.friend.id)} 
+                        onClick={() => handleGoChat(item.id)}
                         mr={2}
                       >Chat</Button>
-                      <Button
-                        aria-label="View Profile"
-                        colorScheme="teal"
-                        onClick={() => handleViewProfile(item.friend.id)} 
-                        mr={2}
-                      >View</Button>
                       <Button
                         aria-label="Delete Friend"
                         colorScheme="red"
@@ -206,10 +200,11 @@ const ListFriend = () => {
                     </Flex>
                   </Flex>
                 </Box>
-              )))
-            }
-          </Flex>
-        </Box>
+
+              </Flex>
+            </Box>
+          )))
+        }
         <Box px={3}
           style={{
             width: "100%",
@@ -222,6 +217,7 @@ const ListFriend = () => {
           {alt ? (<CustomAlert message={mess} status={statusMess} style={{ position: 'fixed', bottom: '10px', right: '10px', zIndex: '9999' }} />) : null}
         </Box>
       </Box>
+
 
       {/* main scroll */}
       <Box Box overflowY="scroll" height="calc(100vh - 60px)" >
