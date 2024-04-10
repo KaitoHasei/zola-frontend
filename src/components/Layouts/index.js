@@ -87,7 +87,7 @@ const AppLayout = () => {
 
       try {
         const response = await post("/conversations", {
-          participantId: user?.id,
+          participantIds: [user?.id],
         });
 
         if (response?.status === 201)

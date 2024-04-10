@@ -3,6 +3,8 @@ import { useNavigate, Link as ReactRouterLink } from "react-router-dom";
 import { Box, Heading, Text, Link } from "@chakra-ui/react";
 
 import RegisterSuccessSVG from "#/assets/images/RegisterSuccess.svg";
+import successEle from "#/assets/images/successEle.svg";
+import successEle2 from "#/assets/images/successEle2.svg";
 
 export default function RegisterSuccess() {
   const navigate = useNavigate();
@@ -82,7 +84,7 @@ export default function RegisterSuccess() {
           width: "30%",
           height: "auto",
         }}
-        src={require("../../../assets/images/successEle2.svg").default}
+        src={successEle2}
         alt="top left"
       />
       <img
@@ -94,7 +96,7 @@ export default function RegisterSuccess() {
           width: "30%",
           height: "auto",
         }}
-        src={require("../../../assets/images/successEle.svg").default}
+        src={successEle}
         alt="bottom left"
       />
     </Box>

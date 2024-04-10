@@ -12,9 +12,11 @@ import {
   Flex,
   Stack,
   Avatar,
+  AvatarGroup,
   Input,
   Text,
   IconButton,
+  HStack,
 } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
@@ -31,7 +33,7 @@ import Message from "#/components/Message";
 import "./App.scss";
 import { SocketContext } from "#/contexts/SocketContext";
 import PreviewImageUpload from "#/components/PreviewImageUpload";
-
+import ConversationInfo from "./ConversationInfo";
 function App() {
   const { user, conversationId } = useContext(GlobalContext);
   const { socket, setSocket } = useContext(SocketContext);
@@ -131,7 +133,6 @@ function App() {
     const _images = [...event.target.files];
     event.target.value = "";
     setImages(_images.slice(0, 6));
-    console.log(event);
   };
 
   const handleAddImage = (images) => {
@@ -158,11 +159,22 @@ function App() {
     return (
       <Flex padding="10px">
         <Flex alignItems="center">
-          <Avatar
-            size="sm"
-            src={getConversationAvatar(conversation, user.id)}
-            bg="gray.400"
-          />
+          <Box>
+            {conversation?.isGroup ? (
+              <AvatarGroup size="sm" max={3}>
+                {getConversationAvatar(conversation, user.id)?.map(
+                  (item, index) => (
+                    <Avatar key={index} src={item} />
+                  )
+                )}
+              </AvatarGroup>
+            ) : (
+              <Avatar
+                src={getConversationAvatar(conversation, user.id)}
+                bg="gray.400"
+              />
+            )}
+          </Box>
           <Text as="b" noOfLines={1} maxWidth="250px" marginLeft="10px">
             {formatConversationName(conversation, user.id)}
           </Text>
@@ -280,9 +292,17 @@ function App() {
           </Text>
         </Box>
       ) : (
-        <FeedLayout height="100%" title={renderTitle}>
-          {renderFeedChild}
-        </FeedLayout>
+        <HStack height="100%" gap="0">
+          <FeedLayout height="100%" title={renderTitle} width="70%">
+            {renderFeedChild}
+          </FeedLayout>
+          <ConversationInfo
+            user={user}
+            conversation={conversation}
+            getConversationAvatar={getConversationAvatar}
+            formatConversationName={formatConversationName}
+          />
+        </HStack>
       )}
     </>
   );
