@@ -13,10 +13,12 @@ const SearchFriendModal = ({ isOpen, onClose, userList }) => {
 
   console.log("UserList : ", userList);
   useEffect(() => {
-    const results = userList.filter(user =>
-      user.displayName.toLowerCase().includes(searchTerm.toLowerCase()) && user.status !== 1
-    );
-    setSearchResults(results);
+    if (userList.length > 0) {
+      const results = userList.filter(user =>
+        user.displayName.toLowerCase().includes(searchTerm.toLowerCase()) && user.status !== 1
+      );
+      setSearchResults(results);
+    }
   }, [userList, searchTerm]);
 
   const handleSearch = () => {

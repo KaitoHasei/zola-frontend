@@ -13,21 +13,14 @@ const SentedFriendRequest = () => {
   const [alt, setAlt] = useState(false);
   const [mess, setMess] = useState('');
   const [statusMess, setStatusMess] = useState('info');
-  const [selectedFriend, setSelectedFriend] = useState(null); 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState(null);
 
 
   useEffect(() => {
     getFriendRequest();
   }, []);
 
-  const handleViewInfo = (friend) => {
-    setSelectedFriend(friend); 
-    console.log("friend",friend)
-  };
-
-  const handleCloseModal = () => {
-    setSelectedFriend(null); // 
-  };
   const getFriendRequest = async () => {
     try {
       const response = await get("/contacts/get-friend-requested");
@@ -40,7 +33,7 @@ const SentedFriendRequest = () => {
     }
   }
 
-  const handleCancelRequest = async(id) => {
+  const handleCancelRequest = async (id) => {
     try {
       const response = await post("/contacts/remove-friend", { id });
       if (response.status === 200) {
@@ -90,7 +83,13 @@ const SentedFriendRequest = () => {
   const handleSortChange = (type) => {
     setSortBy(type);
   };
-
+  const handleGetInfo = (item) => {
+    setSelectedFriend(item.friend);
+    setIsModalOpen(true);
+  }
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
   return (
     <div style={{ height: '100vh' }}>
@@ -150,12 +149,14 @@ const SentedFriendRequest = () => {
                     <Box flex="1" ml={2}>
                       <Text fontSize="sm" color="gray.500">Sent {moment(item.updatedAt).fromNow()}</Text>
                     </Box>
-{/*                     <Button onClick={() => handleViewInfo(item.friend)} bg="teal.500" color="white" _hover={{ bg: 'teal.600' }}>
-                      info
-                    </Button> */}
-                    <Button onClick={() => handleCancelRequest(item.id)} bg="teal.500" color="white" _hover={{ bg: 'teal.600' }}>
-                      Cancle
-                    </Button>
+                    <Flex>
+                      <Button onClick={() => handleGetInfo(item)} bg="blue" color="white" _hover={{ bg: 'teal.600' }} mr={2}>
+                        info
+                      </Button>
+                      <Button onClick={() => handleCancelRequest(item.id)} bg="gray" color="white" _hover={{ bg: 'teal.600' }}>
+                        Cancle
+                      </Button>
+                    </Flex>
                   </Flex>
                 </Box>
               </Flex>
@@ -163,6 +164,7 @@ const SentedFriendRequest = () => {
           )))
         }
       </Box>
+      <FriendModal isOpen={isModalOpen} onClose={handleCloseModal} friend={selectedFriend} />
       <Box px={3}
         style={{
           width: "100%",

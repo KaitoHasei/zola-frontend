@@ -1,15 +1,14 @@
 import CustomAlert from '#/CustomAlert';
 import { get, post } from '#/axios';
-import SearchFriendModal from '#/components/SearchFriendModel';
 import { Box, Flex, Text, Button, Input, Avatar } from '@chakra-ui/react'
 import { Icon } from '@iconify-icon/react'
-import React, { useContext, useEffect, useState } from 'react'
-import { useCallback } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { GlobalContext } from '#/contexts/GlobalContext';
 import { useNavigate } from "react-router-dom";
+import SearchFriend from '#/components/SearchFriend';
+import FriendModal from '#/components/FriendModal';
 
 const ListFriend = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [userList, setUserList] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
@@ -18,7 +17,9 @@ const ListFriend = () => {
   const [mess, setMess] = useState('');
   const [statusMess, setStatusMess] = useState('info');
   const navigate = useNavigate();
-  const { user, setConversationId } = useContext(GlobalContext);
+  const { setConversationId } = useContext(GlobalContext);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState(null);
 
   useEffect(() => {
     getContacts();
@@ -48,13 +49,6 @@ const ListFriend = () => {
     }
   }
 
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
   const filteredData = data.filter(item => {
     if (
       item.friend.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -82,22 +76,19 @@ const ListFriend = () => {
 
   const handleGoChat = useCallback(
     async (id) => {
-      console.log("id", id)
-      if (!user) return;
-
       try {
         const response = await post("/conversations", {
-          participantId: id,
+          participantIds: [id],
         });
 
-        if (response?.status === 201)
-          setConversationId(response?.data?.id);
-        return navigate("/");
+        if (response.status === 201) {
+          setConversationId(response.data.id);
+          return navigate("/");
+        }
       } catch (error) { }
     },
     [setConversationId]
   );
-
   const handleRemoveFriend = async (id) => {
     try {
       const response = await post("/contacts/remove-friend", { id });
@@ -122,6 +113,14 @@ const ListFriend = () => {
     }
   }
 
+  const handleGetInfo = (item) => {
+    setSelectedFriend(item.friend);
+    setIsModalOpen(true);
+  }
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <div style={{ height: '100vh' }}>
       {/* header */}
@@ -134,10 +133,9 @@ const ListFriend = () => {
             <Text>Friends list</Text>
           </Box>
           <Box>
-            <Button onClick={handleOpenModal}><Icon icon="fluent-mdl2:add-friend" /></Button>
+            <SearchFriend />
           </Box>
         </Flex>
-        <SearchFriendModal isOpen={isModalOpen} onClose={handleCloseModal} userList={userList} />
       </Box >
 
       <Box>
@@ -186,6 +184,12 @@ const ListFriend = () => {
                       <Text fontSize="sm" fontStyle="italic">Email: {item.friend.email}</Text>
                     </Box>
                     <Flex>
+                    <Button
+                        aria-label="info"
+                        colorScheme="blue"
+                        onClick={() => handleGetInfo(item)}
+                        mr={2}
+                      >info</Button>
                       <Button
                         aria-label="Chat"
                         colorScheme="teal"
@@ -194,7 +198,7 @@ const ListFriend = () => {
                       >Chat</Button>
                       <Button
                         aria-label="Delete Friend"
-                        colorScheme="red"
+                        colorScheme="gray"
                         onClick={() => handleRemoveFriend(item.id)}
                       >Remove</Button>
                     </Flex>
@@ -205,6 +209,7 @@ const ListFriend = () => {
             </Box>
           )))
         }
+        <FriendModal isOpen={isModalOpen} onClose={handleCloseModal} friend={selectedFriend}/>
         <Box px={3}
           style={{
             width: "100%",
@@ -216,15 +221,6 @@ const ListFriend = () => {
           }}>
           {alt ? (<CustomAlert message={mess} status={statusMess} style={{ position: 'fixed', bottom: '10px', right: '10px', zIndex: '9999' }} />) : null}
         </Box>
-      </Box>
-
-
-      {/* main scroll */}
-      <Box Box overflowY="scroll" height="calc(100vh - 60px)" >
-        <Flex bg='teal.20'>
-
-
-        </Flex>
       </Box>
     </div >
   )

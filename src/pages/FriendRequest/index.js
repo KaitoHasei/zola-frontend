@@ -4,6 +4,7 @@ import { Icon } from '@iconify-icon/react'
 import React, { useEffect, useState } from 'react'
 import moment from 'moment';
 import CustomAlert from '#/CustomAlert';
+import FriendModal from '#/components/FriendModal';
 
 const FriendRequest = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -12,6 +13,8 @@ const FriendRequest = () => {
   const [alt, setAlt] = useState(false);
   const [mess, setMess] = useState('');
   const [statusMess, setStatusMess] = useState('info');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState(null);
 
   useEffect(() => {
     getFriendRequest();
@@ -70,12 +73,43 @@ const FriendRequest = () => {
     return 0;
   });
 
+  const handleRemoveFriend = async (id) => {
+    try {
+      const response = await post("/contacts/remove-friend", { id });
+      if (response.status === 200) {
+        setMess('Remove successfully !');
+        setStatusMess('success');
+        setAlt(true);
+        setTimeout(() => {
+          setAlt(false);
+        }, 1000);
+        getFriendRequest();
+      } else {
+        setMess('Error remove friend !');
+        setStatusMess('error');
+        setAlt(true);
+        setTimeout(() => {
+          setAlt(false);
+        }, 1000);
+      }
+    } catch (error) {
+      console.log("Error remove friend : ", error);
+    }
+  }
+
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
 
   const handleSortChange = (type) => {
     setSortBy(type);
+  };
+  const handleGetInfo = (item) => {
+    setSelectedFriend(item.friend);
+    setIsModalOpen(true);
+  }
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
   };
 
 
@@ -137,15 +171,26 @@ const FriendRequest = () => {
                     <Box flex="1" ml={2}>
                       <Text fontSize="sm" color="gray.500">Sent {moment(item.updatedAt).fromNow()}</Text>
                     </Box>
-                    <Button onClick={() => handleAceptFriend(item.id)} bg="teal.500" color="white" _hover={{ bg: 'teal.600' }}>
-                      Acept
-                    </Button>
+                    <Flex>
+                      <Button onClick={() => handleGetInfo(item)} bg="blue" color="white" _hover={{ bg: 'teal.600' }} mr={2}>
+                        info
+                      </Button>
+                      <Button onClick={() => handleAceptFriend(item.id)} bg="teal.500" color="white" _hover={{ bg: 'teal.600' }} mr={2}>
+                        Acept
+                      </Button>
+                      <Button
+                        aria-label="Delete Friend"
+                        colorScheme="gray"
+                        onClick={() => handleRemoveFriend(item.id)}
+                      >Remove</Button>
+                    </Flex>
                   </Flex>
                 </Box>
               )))
             }
           </Flex>
         </Box>
+        <FriendModal isOpen={isModalOpen} onClose={handleCloseModal} friend={selectedFriend} />
         <Box px={3}
           style={{
             width: "100%",
@@ -162,4 +207,4 @@ const FriendRequest = () => {
   )
 }
 
-export default FriendRequest
+export default FriendRequest;

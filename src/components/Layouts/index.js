@@ -48,17 +48,17 @@ const AppLayout = () => {
     } catch (error) { }
   }, [setUser]);
 
-  const getListFriend = async() => {
+  const getListFriend = async () => {
     const response = await get("/contacts/get-friends-user");
-    if((await response).status===200) {
+    if (response.status === 200) {
       setDataSearch(response.data);
       console.log("response : ", response);
     }
   }
 
-  useEffect(()=> {
-    isSearch?getListFriend():setDataSearch([]);
-  },[isSearch]);
+  useEffect(() => {
+    isSearch ? getListFriend() : setDataSearch([]);
+  }, [isSearch]);
 
   // connect with root socket
   useEffect(() => {
@@ -89,14 +89,13 @@ const AppLayout = () => {
         setListUser(res?.data?.list);
       })
       .catch((error) => { }); */
-      console.log("Dataa : ", dataSearch)
-      const filteredData = dataSearch?.filter((item) => {
-        if(item?.displayName.toLowerCase().includes(value?.toLowerCase())||item?.email.toLowerCase().includes(value?.toLowerCase())) {
-          return true;
-        }
-        return false;
-      })
-      setListUser(filteredData);
+    const filteredData = dataSearch?.filter((item) => {
+      if (item?.displayName.toLowerCase().includes(value?.toLowerCase()) || item?.email.toLowerCase().includes(value?.toLowerCase())) {
+        return true;
+      }
+      return false;
+    })
+    setListUser(filteredData);
   };
 
   const handleClickUserSearched = useCallback(
@@ -173,7 +172,7 @@ const AppLayout = () => {
               }}
               marginBottom={4}
             >
-                <ModelUser />
+              <ModelUser />
             </Box>
             <Tooltip placement='auto-start' label='Chat'>
               <Link to="/">
