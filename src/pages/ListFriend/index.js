@@ -1,6 +1,5 @@
 import CustomAlert from '#/CustomAlert';
 import { get, post } from '#/axios';
-<<<<<<< HEAD
 import { Box, Flex, Text, Button, Input, Avatar } from '@chakra-ui/react'
 import { Icon } from '@iconify-icon/react'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
@@ -10,18 +9,6 @@ import SearchFriend from '#/components/SearchFriend';
 import FriendModal from '#/components/FriendModal';
 
 const ListFriend = () => {
-=======
-import SearchFriendModal from '#/components/SearchFriendModel';
-import { Box, Flex, Text, Button, Input, Avatar } from '@chakra-ui/react'
-import { Icon } from '@iconify-icon/react'
-import React, { useContext, useEffect, useState } from 'react'
-import { useCallback } from 'react';
-import { GlobalContext } from '#/contexts/GlobalContext';
-import { useNavigate } from "react-router-dom";
-
-const ListFriend = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
->>>>>>> dcbe203ea87d4e75bf037e6d8aea4ca302ff8b20
   const [userList, setUserList] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
@@ -30,13 +17,9 @@ const ListFriend = () => {
   const [mess, setMess] = useState('');
   const [statusMess, setStatusMess] = useState('info');
   const navigate = useNavigate();
-<<<<<<< HEAD
   const { setConversationId } = useContext(GlobalContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState(null);
-=======
-  const { user, setConversationId } = useContext(GlobalContext);
->>>>>>> dcbe203ea87d4e75bf037e6d8aea4ca302ff8b20
 
   useEffect(() => {
     getContacts();
@@ -66,16 +49,6 @@ const ListFriend = () => {
     }
   }
 
-<<<<<<< HEAD
-=======
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
->>>>>>> dcbe203ea87d4e75bf037e6d8aea4ca302ff8b20
   const filteredData = data.filter(item => {
     if (
       item.friend.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -103,7 +76,6 @@ const ListFriend = () => {
 
   const handleGoChat = useCallback(
     async (id) => {
-<<<<<<< HEAD
       try {
         const response = await post("/conversations", {
           participantIds: [id],
@@ -113,27 +85,11 @@ const ListFriend = () => {
           setConversationId(response.data.id);
           return navigate("/");
         }
-=======
-      console.log("id", id)
-      if (!user) return;
-
-      try {
-        const response = await post("/conversations", {
-          participantId: id,
-        });
-
-        if (response?.status === 201)
-          setConversationId(response?.data?.id);
-        return navigate("/");
->>>>>>> dcbe203ea87d4e75bf037e6d8aea4ca302ff8b20
       } catch (error) { }
     },
     [setConversationId]
   );
-<<<<<<< HEAD
-=======
 
->>>>>>> dcbe203ea87d4e75bf037e6d8aea4ca302ff8b20
   const handleRemoveFriend = async (id) => {
     try {
       const response = await post("/contacts/remove-friend", { id });
@@ -158,7 +114,6 @@ const ListFriend = () => {
     }
   }
 
-<<<<<<< HEAD
   const handleGetInfo = (item) => {
     setSelectedFriend(item.friend);
     setIsModalOpen(true);
@@ -167,8 +122,6 @@ const ListFriend = () => {
     setIsModalOpen(false);
   };
 
-=======
->>>>>>> dcbe203ea87d4e75bf037e6d8aea4ca302ff8b20
   return (
     <div style={{ height: '100vh' }}>
       {/* header */}
@@ -181,16 +134,9 @@ const ListFriend = () => {
             <Text>Friends list</Text>
           </Box>
           <Box>
-<<<<<<< HEAD
             <SearchFriend />
           </Box>
         </Flex>
-=======
-            <Button onClick={handleOpenModal}><Icon icon="fluent-mdl2:add-friend" /></Button>
-          </Box>
-        </Flex>
-        <SearchFriendModal isOpen={isModalOpen} onClose={handleCloseModal} userList={userList} />
->>>>>>> dcbe203ea87d4e75bf037e6d8aea4ca302ff8b20
       </Box >
 
       <Box>
@@ -239,15 +185,12 @@ const ListFriend = () => {
                       <Text fontSize="sm" fontStyle="italic">Email: {item.friend.email}</Text>
                     </Box>
                     <Flex>
-<<<<<<< HEAD
                     <Button
                         aria-label="info"
                         colorScheme="blue"
                         onClick={() => handleGetInfo(item)}
                         mr={2}
                       >info</Button>
-=======
->>>>>>> dcbe203ea87d4e75bf037e6d8aea4ca302ff8b20
                       <Button
                         aria-label="Chat"
                         colorScheme="teal"
@@ -256,17 +199,12 @@ const ListFriend = () => {
                       >Chat</Button>
                       <Button
                         aria-label="Delete Friend"
-<<<<<<< HEAD
                         colorScheme="gray"
-=======
-                        colorScheme="red"
->>>>>>> dcbe203ea87d4e75bf037e6d8aea4ca302ff8b20
                         onClick={() => handleRemoveFriend(item.id)}
                       >Remove</Button>
                     </Flex>
                   </Flex>
                 </Box>
-<<<<<<< HEAD
 
               </Flex>
             </Box>
@@ -284,33 +222,6 @@ const ListFriend = () => {
           }}>
           {alt ? (<CustomAlert message={mess} status={statusMess} style={{ position: 'fixed', bottom: '10px', right: '10px', zIndex: '9999' }} />) : null}
         </Box>
-=======
-
-              </Flex>
-            </Box>
-          )))
-        }
-        <Box px={3}
-          style={{
-            width: "100%",
-            height: '55px',
-            position: 'fixed',
-            bottom: 0,
-            right: '10px',
-            zIndex: '9999'
-          }}>
-          {alt ? (<CustomAlert message={mess} status={statusMess} style={{ position: 'fixed', bottom: '10px', right: '10px', zIndex: '9999' }} />) : null}
-        </Box>
-      </Box>
-
-
-      {/* main scroll */}
-      <Box Box overflowY="scroll" height="calc(100vh - 60px)" >
-        <Flex bg='teal.20'>
-
-
-        </Flex>
->>>>>>> dcbe203ea87d4e75bf037e6d8aea4ca302ff8b20
       </Box>
     </div >
   )
