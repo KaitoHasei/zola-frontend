@@ -26,14 +26,13 @@ const SentedFriendRequest = () => {
       const response = await get("/contacts/get-friend-requested");
       if (response.status === 200) {
         setData(response.data);
-        console.log("Data requested : ", response.data);
       }
     } catch (error) {
       console.log("Error get list friend requested : ", error);
     }
   }
 
-  const handleCancelRequest = async (id) => {
+  const handleCancelRequest = async(id) => {
     try {
       const response = await post("/contacts/remove-friend", { id });
       if (response.status === 200) {
@@ -90,6 +89,7 @@ const SentedFriendRequest = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
+
 
   return (
     <div style={{ height: '100vh' }}>
@@ -157,6 +157,7 @@ const SentedFriendRequest = () => {
                         Cancle
                       </Button>
                     </Flex>
+
                   </Flex>
                 </Box>
               </Flex>

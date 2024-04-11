@@ -33,9 +33,13 @@ const AppLayout = () => {
   const [listUser, setListUser] = useState([]);
   const [view, setView] = useState(VIEW_CHAT);
 <<<<<<< HEAD
+<<<<<<< HEAD
   const [dataSearch, setDataSearch] = useState([]);
 =======
 >>>>>>> 14f6023530e8d0c1b7768df3b6babff47183d768
+=======
+  const [dataSearch, setDataSearch] = useState([]);
+>>>>>>> dcbe203ea87d4e75bf037e6d8aea4ca302ff8b20
 
   // call api get data
   useEffect(() => {
@@ -51,17 +55,29 @@ const AppLayout = () => {
     } catch (error) { }
   }, [setUser]);
 
+<<<<<<< HEAD
   const getListFriend = async () => {
     const response = await get("/contacts/get-friends-user");
     if (response.status === 200) {
+=======
+  const getListFriend = async() => {
+    const response = await get("/contacts/get-friends-user");
+    if((await response).status===200) {
+>>>>>>> dcbe203ea87d4e75bf037e6d8aea4ca302ff8b20
       setDataSearch(response.data);
       console.log("response : ", response);
     }
   }
 
+<<<<<<< HEAD
   useEffect(() => {
     isSearch ? getListFriend() : setDataSearch([]);
   }, [isSearch]);
+=======
+  useEffect(()=> {
+    isSearch?getListFriend():setDataSearch([]);
+  },[isSearch]);
+>>>>>>> dcbe203ea87d4e75bf037e6d8aea4ca302ff8b20
 
   // connect with root socket
   useEffect(() => {
@@ -92,6 +108,7 @@ const AppLayout = () => {
         setListUser(res?.data?.list);
       })
 <<<<<<< HEAD
+<<<<<<< HEAD
       .catch((error) => { }); */
     const filteredData = dataSearch?.filter((item) => {
       if (item?.displayName.toLowerCase().includes(value?.toLowerCase()) || item?.email.toLowerCase().includes(value?.toLowerCase())) {
@@ -103,6 +120,17 @@ const AppLayout = () => {
 =======
       .catch((error) => { });
 >>>>>>> 14f6023530e8d0c1b7768df3b6babff47183d768
+=======
+      .catch((error) => { }); */
+      console.log("Dataa : ", dataSearch)
+      const filteredData = dataSearch?.filter((item) => {
+        if(item?.displayName.toLowerCase().includes(value?.toLowerCase())||item?.email.toLowerCase().includes(value?.toLowerCase())) {
+          return true;
+        }
+        return false;
+      })
+      setListUser(filteredData);
+>>>>>>> dcbe203ea87d4e75bf037e6d8aea4ca302ff8b20
   };
 
   const handleClickUserSearched = useCallback(
