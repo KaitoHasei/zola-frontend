@@ -354,7 +354,7 @@ function App() {
         </Box>
       ) : (
         <HStack height="100%" gap="0">
-          <FeedLayout height="100%" title={renderTitle} width="70%">
+          <FeedLayout height="100%" title={renderTitle} flex="1">
             {renderFeedChild}
           </FeedLayout>
           <ConversationInfo

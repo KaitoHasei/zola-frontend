@@ -8,7 +8,8 @@ import {
   StackDivider,
   Avatar,
   Image,
-  SimpleGrid,
+  Grid,
+  GridItem,
 } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import { del, get, post } from "#/axios";
@@ -45,30 +46,29 @@ const ConversationInfo = ({
 
   const renderMediaView = () => {
     return (
-      <SimpleGrid
-        columns={{ base: 1, md: 3 }}
-        spacing="0.3rem"
-        padding="0.3rem"
-        overflow="scroll"
+      <Grid
+        maxWidth={{ lg: "350px", xl: "400px" }}
+        templateColumns="repeat(3, 1fr)"
+        gap="3px"
       >
         {images.map((imageUrl, index) => (
-          <Box key={index} boxShadow="md" borderRadius="md" overflow="hidden">
+          <GridItem key={index} width="100%" aspectRatio={1} overflow="hidden">
             <Image
               src={imageUrl}
               alt={`Media ${index}`}
-              objectFit="fill"
+              objectFit="cover"
               width="100%"
             />
-          </Box>
+          </GridItem>
         ))}
-      </SimpleGrid>
+      </Grid>
     );
   };
 
   const renderConversationInfo = useMemo(() => {
     return (
       <VStack
-        width="30%"
+        width="20%"
         height="100%"
         padding="1rem 0"
         borderLeft="solid lightgrey 1px"
