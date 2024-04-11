@@ -10,6 +10,11 @@ import {
   Image,
   Grid,
   GridItem,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalBody,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import { del, get, post } from "#/axios";
@@ -21,7 +26,8 @@ const ConversationInfo = ({
   conversationId,
 }) => {
   const [activeView, setActiveView] = useState("default");
-
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [selectedImage, setSelectedImage] = useState(null);
   const handleViewChange = (view) => {
     setActiveView(view);
   };
@@ -43,28 +49,41 @@ const ConversationInfo = ({
       fetchImages();
     }
   }, [conversationId, activeView]);
+  const handleImageClick = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    onOpen();
+  };
 
   const renderMediaView = () => {
     return (
-      <Grid
-        maxWidth={{ lg: "350px", xl: "400px" }}
-        templateColumns="repeat(3, 1fr)"
-        gap="3px"
-      >
-        {images.map((imageUrl, index) => (
-          <GridItem key={index} width="100%" aspectRatio={1} overflow="hidden">
-            <Image
-              src={imageUrl}
-              alt={`Media ${index}`}
-              objectFit="cover"
+      <Box width="100%" maxH="90vh" overflowY="auto">
+        <Grid
+          maxWidth={{ lg: "350px", xl: "400px" }}
+          templateColumns="repeat(3, 1fr)"
+          gap="3px"
+        >
+          {images.map((imageUrl, index) => (
+            <GridItem
+              key={index}
               width="100%"
-            />
-          </GridItem>
-        ))}
-      </Grid>
+              aspectRatio={1}
+              overflow="hidden"
+              cursor="pointer"
+              onClick={() => handleImageClick(imageUrl)}
+            >
+              <Image
+                src={imageUrl}
+                alt={`Media ${index}`}
+                objectFit="cover"
+                width="100%"
+                height="100%"
+              />
+            </GridItem>
+          ))}
+        </Grid>
+      </Box>
     );
   };
-
   const renderConversationInfo = useMemo(() => {
     return (
       <VStack
@@ -214,6 +233,23 @@ const ConversationInfo = ({
     );
   }, [user, conversation, activeView, images]);
 
-  return <>{renderConversationInfo}</>;
+  return (
+    <>
+      {renderConversationInfo}
+      <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalBody>
+            <Image
+              src={selectedImage}
+              alt="Selected media"
+              maxW="100%"
+              maxH="100%"
+            />
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    </>
+  );
 };
 export default ConversationInfo;
