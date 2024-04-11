@@ -362,6 +362,7 @@ function App() {
             conversation={conversation}
             getConversationAvatar={getConversationAvatar}
             formatConversationName={formatConversationName}
+            conversationId={conversationId}
           />
         </HStack>
       )}

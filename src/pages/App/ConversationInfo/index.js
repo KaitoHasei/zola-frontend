@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   VStack,
   Box,
@@ -7,20 +7,62 @@ import {
   Button,
   StackDivider,
   Avatar,
+  Image,
+  SimpleGrid,
 } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
-
+import { del, get, post } from "#/axios";
 const ConversationInfo = ({
   user,
   conversation,
   getConversationAvatar,
   formatConversationName,
-  // any other props you need to pass down
+  conversationId,
 }) => {
   const [activeView, setActiveView] = useState("default");
 
   const handleViewChange = (view) => {
     setActiveView(view);
+  };
+
+  const [images, setImages] = useState([]);
+
+  useEffect(() => {
+    if (activeView === "media" && conversationId) {
+      const fetchImages = async () => {
+        try {
+          const response = await get(`/conversations/${conversationId}/images`);
+          const uniqueImages = Array.from(new Set(response.data));
+          setImages(uniqueImages);
+        } catch (error) {
+          console.error("Error fetching images:", error);
+        }
+      };
+
+      fetchImages();
+    }
+  }, [conversationId, activeView]);
+
+  const renderMediaView = () => {
+    return (
+      <SimpleGrid
+        columns={{ base: 1, md: 3 }}
+        spacing="0.3rem"
+        padding="0.3rem"
+        overflow="scroll"
+      >
+        {images.map((imageUrl, index) => (
+          <Box key={index} boxShadow="md" borderRadius="md" overflow="hidden">
+            <Image
+              src={imageUrl}
+              alt={`Media ${index}`}
+              objectFit="fill"
+              width="100%"
+            />
+          </Box>
+        ))}
+      </SimpleGrid>
+    );
   };
 
   const renderConversationInfo = useMemo(() => {
@@ -114,6 +156,7 @@ const ConversationInfo = ({
                 Media
               </Text>
             </HStack>
+            {renderMediaView()}
           </VStack>
         )}
         ;
@@ -169,7 +212,7 @@ const ConversationInfo = ({
         ;
       </VStack>
     );
-  }, [user, conversation, activeView]);
+  }, [user, conversation, activeView, images]);
 
   return <>{renderConversationInfo}</>;
 };
