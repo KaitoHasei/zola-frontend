@@ -34,10 +34,7 @@ import "./App.scss";
 import { SocketContext } from "#/contexts/SocketContext";
 import PreviewImageUpload from "#/components/PreviewImageUpload";
 import ConversationInfo from "./ConversationInfo";
-<<<<<<< HEAD
-=======
 import EmojiPicker from "emoji-picker-react";
->>>>>>> 14f6023530e8d0c1b7768df3b6babff47183d768
 function App() {
   const { user, conversationId } = useContext(GlobalContext);
   const { socket, setSocket } = useContext(SocketContext);
