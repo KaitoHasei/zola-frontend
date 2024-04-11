@@ -9,7 +9,6 @@ import ListGroup from "#/pages/ListGroup";
 import FriendRequest from "#/pages/FriendRequest";
 import NotificationList from "#/pages/NotificationList";
 import RegisterSuccess from "#/pages/Register/RegisterSuccess";
-import { element } from "prop-types";
 import SentedFriendRequest from "#/pages/SendtedFriendRequest";
 
 export const routes = [

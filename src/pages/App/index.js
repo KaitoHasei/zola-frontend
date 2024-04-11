@@ -13,15 +13,15 @@ import {
   Stack,
   Avatar,
   AvatarGroup,
-  Input,
   Text,
   IconButton,
   HStack,
+  Textarea,
 } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
 
-import { get, post } from "#/axios";
+import { del, get, post } from "#/axios";
 import { getSocket } from "#/socket";
 import { formatConversationName, getConversationAvatar } from "#/utils";
 
@@ -34,6 +34,10 @@ import "./App.scss";
 import { SocketContext } from "#/contexts/SocketContext";
 import PreviewImageUpload from "#/components/PreviewImageUpload";
 import ConversationInfo from "./ConversationInfo";
+<<<<<<< HEAD
+=======
+import EmojiPicker from "emoji-picker-react";
+>>>>>>> 14f6023530e8d0c1b7768df3b6babff47183d768
 function App() {
   const { user, conversationId } = useContext(GlobalContext);
   const { socket, setSocket } = useContext(SocketContext);
@@ -44,6 +48,7 @@ function App() {
   const [conversation, setConversation] = useState([]);
   const [images, setImages] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
 
   // connect with chat socket
   useEffect(() => {
@@ -76,8 +81,10 @@ function App() {
       get(`/conversations/${conversationId}`).then((res) =>
         setConversation(res?.data)
       );
-      get(`/conversations/${conversationId}/messages?pageSize=20`).then((res) =>
-        setMessages(res?.data?.message || [])
+      get(`/conversations/${conversationId}/messages?pageSize=20`).then(
+        (res) => {
+          setMessages(res?.data?.message || []);
+        }
       );
     }
   }, [conversationId]);
@@ -89,13 +96,35 @@ function App() {
         setMessages((prev) => [newMessage.message, ...prev]);
       }
     };
+    const onRevokeMessage = (message) => {
+      const _message = [...messages];
+      const indexOfMessage = _message.findIndex(
+        (item) => item.cuid === message.cuid
+      );
+
+      _message.splice(indexOfMessage, 1);
+
+      setMessages(_message);
+    };
 
     socket.chatSocket?.on("sent_message", onNewMessage);
+    socket.chatSocket?.on("revoke_message", onRevokeMessage);
 
     return () => {
       socket.chatSocket?.off("sent_message", onNewMessage);
+      socket.chatSocket?.off("revoke_message", onRevokeMessage);
     };
-  }, [socket.chatSocket, setMessages]);
+  }, [socket.chatSocket, messages, setMessages]);
+
+  const handleClickEmoji = (emojiObject) => {
+    const cursor = inputRef.current.selectionStart;
+    const inputMessage = inputRef.current.value;
+    const message =
+      inputMessage.slice(0, cursor) +
+      emojiObject.emoji +
+      inputMessage.slice(cursor);
+    inputRef.current.value = message;
+  };
 
   const handleSendMessage = useCallback(() => {
     const message = inputRef.current.value.trim();
@@ -124,6 +153,12 @@ function App() {
       content: message,
     });
   }, [conversationId, images]);
+
+  const handleRevokeMessage = (messageCuid) => {
+    if (!messageCuid) return;
+
+    return del(`/conversations/${conversationId}/messages/${messageCuid}`);
+  };
 
   const handleClickSelectImage = () => {
     selectImageRef.current.click();
@@ -171,6 +206,7 @@ function App() {
             ) : (
               <Avatar
                 src={getConversationAvatar(conversation, user.id)}
+                size="sm"
                 bg="gray.400"
               />
             )}
@@ -211,6 +247,7 @@ function App() {
                 message={item}
                 previousSameUser={previousSameUser}
                 nextSameUser={nextSameUser}
+                onRevoke={handleRevokeMessage}
               />
             );
           })}
@@ -221,8 +258,8 @@ function App() {
             handleSendMessage();
           }}
         >
-          <Flex padding="10px" alignItems="end">
-            <Box display={!_.isEmpty(images) && "none"} marginRight="10px">
+          <Flex padding="10px" alignItems="end" position="relative">
+            <Box display={!_.isEmpty(images) && "none"} padding="10px">
               <IconButton
                 aria-label="send-pic"
                 icon={<Icon icon="icon-park-solid:add-pic" />}
@@ -255,27 +292,54 @@ function App() {
                   onRemoveImage={handleRemoveImage}
                 />
               )}
-              <Input
-                ref={inputRef}
-                variant="unstyled"
-                placeholder="Aa"
-                _focus={{ borderColor: "unset", boxShadow: "unset" }}
+              <Flex alignItems="center">
+                <Textarea
+                  ref={inputRef}
+                  minHeight="auto"
+                  size="sm"
+                  variant="unstyled"
+                  resize="none"
+                  placeholder="Aa"
+                  _focus={{ borderColor: "unset", boxShadow: "unset" }}
+                  onKeyDown={(keydown) => {
+                    if (!keydown.shiftKey && keydown.code === "Enter")
+                      handleSendMessage();
+                  }}
+                />
+                <EmojiPicker
+                  style={{ position: "absolute", top: "-445px", right: "50px" }}
+                  open={openEmojiPicker}
+                  onEmojiClick={handleClickEmoji}
+                />
+                <IconButton
+                  variant="ghost"
+                  icon={<Icon icon="uil:smile" />}
+                  fontSize="24px"
+                  onClick={() => {
+                    if (!openEmojiPicker) return setOpenEmojiPicker(true);
+
+                    return setOpenEmojiPicker(false);
+                  }}
+                />
+              </Flex>
+            </Box>
+            <Box padding="10px">
+              <IconButton
+                isRound={true}
+                aria-label="Send"
+                icon={<Icon icon="mingcute:send-fill" />}
+                variant="ghost"
+                fontSize="25px"
+                onClick={handleSendMessage}
               />
             </Box>
-            <IconButton
-              isRound={true}
-              aria-label="Send"
-              icon={<Icon icon="mingcute:send-fill" />}
-              variant="ghost"
-              fontSize="25px"
-              onClick={handleSendMessage}
-            />
           </Flex>
         </form>
       </Stack>
     );
   }, [
     user,
+    openEmojiPicker,
     conversation,
     images,
     messages,

@@ -8,9 +8,15 @@ import {
   Stack,
   Text,
   Image,
+  Menu,
+  MenuButton,
+  IconButton,
+  MenuList,
+  MenuItem,
 } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import _ from "lodash";
+import { Icon } from "@iconify-icon/react";
 
 const Message = ({
   message,
@@ -18,7 +24,12 @@ const Message = ({
   isSender,
   previousSameUser,
   nextSameUser,
+  onRevoke,
 }) => {
+  const handleClickRevoke = () => {
+    onRevoke(message.cuid);
+  };
+
   const renderImageGrid = useMemo(() => {
     const images = message?.content?.split(",");
 
@@ -85,6 +96,7 @@ const Message = ({
         justifyContent={isSender ? "end" : "start"}
         alignItems="start"
         flexDirection={isSender ? "row-reverse" : "row"}
+        role="group"
       >
         <Avatar
           src={sender?.photoUrl || ""}
@@ -123,6 +135,32 @@ const Message = ({
         ) : (
           renderImageGrid
         )}
+        <Flex
+          display="none"
+          _groupHover={{ display: "flex" }}
+          margin="0 20px"
+          height="100%"
+          alignItems="center"
+        >
+          <Menu>
+            <MenuButton
+              as={IconButton}
+              icon={<Icon icon="ri:more-2-fill" />}
+              variant="ghost"
+              fontSize="20px"
+              borderRadius="100%"
+              _hover={{ cursor: "pointer" }}
+            />
+            <MenuList>
+              <MenuItem
+                icon={<Icon icon="tabler:trash" />}
+                onClick={handleClickRevoke}
+              >
+                Revoke
+              </MenuItem>
+            </MenuList>
+          </Menu>
+        </Flex>
       </Flex>
     </>
   );
@@ -132,9 +170,11 @@ export default Message;
 
 Message.propTypes = {
   message: PropTypes.shape({
+    cuid: PropTypes.string,
     userId: PropTypes.string,
     content: PropTypes.string,
     typeMessage: PropTypes.string,
+    isRevoke: PropTypes.bool,
     createdAt: PropTypes.string,
   }),
   sender: PropTypes.shape({

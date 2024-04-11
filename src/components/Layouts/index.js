@@ -32,7 +32,10 @@ const AppLayout = () => {
   const [isSearch, setSearch] = useState(false);
   const [listUser, setListUser] = useState([]);
   const [view, setView] = useState(VIEW_CHAT);
+<<<<<<< HEAD
   const [dataSearch, setDataSearch] = useState([]);
+=======
+>>>>>>> 14f6023530e8d0c1b7768df3b6babff47183d768
 
   // call api get data
   useEffect(() => {
@@ -88,6 +91,7 @@ const AppLayout = () => {
       .then((res) => {
         setListUser(res?.data?.list);
       })
+<<<<<<< HEAD
       .catch((error) => { }); */
     const filteredData = dataSearch?.filter((item) => {
       if (item?.displayName.toLowerCase().includes(value?.toLowerCase()) || item?.email.toLowerCase().includes(value?.toLowerCase())) {
@@ -96,6 +100,9 @@ const AppLayout = () => {
       return false;
     })
     setListUser(filteredData);
+=======
+      .catch((error) => { });
+>>>>>>> 14f6023530e8d0c1b7768df3b6babff47183d768
   };
 
   const handleClickUserSearched = useCallback(
@@ -172,7 +179,11 @@ const AppLayout = () => {
               }}
               marginBottom={4}
             >
+<<<<<<< HEAD
               <ModelUser />
+=======
+                <ModelUser />
+>>>>>>> 14f6023530e8d0c1b7768df3b6babff47183d768
             </Box>
             <Tooltip placement='auto-start' label='Chat'>
               <Link to="/">
