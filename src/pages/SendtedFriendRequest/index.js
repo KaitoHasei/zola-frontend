@@ -28,7 +28,6 @@ const SentedFriendRequest = () => {
         setData(response.data);
       }
     } catch (error) {
-      console.log("Error get list friend requested : ", error);
     }
   }
 
@@ -52,7 +51,6 @@ const SentedFriendRequest = () => {
         }, 1000);
       }
     } catch (error) {
-      console.log("Error remove friend : ", error);
     }
   }
 

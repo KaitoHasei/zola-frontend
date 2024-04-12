@@ -75,8 +75,10 @@ function App() {
   // call api get data of conversation
   useEffect(() => {
     if (conversationId) {
-      get(`/conversations/${conversationId}`).then((res) =>
+      get(`/conversations/${conversationId}`).then((res) =>{
         setConversation(res?.data)
+        console.log("res call : ", res?.data);
+      }
       );
       get(`/conversations/${conversationId}/messages?pageSize=20`).then(
         (res) => {

@@ -22,30 +22,16 @@ const ListFriend = () => {
   const [selectedFriend, setSelectedFriend] = useState(null);
 
   useEffect(() => {
-    getContacts();
     getAllFriendUser();
   }, []);
-
-  const getContacts = async () => {
-    try {
-      const response = await get('/contacts');
-      if (response.status === 200) {
-        setUserList(response.data);
-      }
-    } catch (error) {
-      console.log('Err get contacts list : ', error);
-    }
-  }
-
+  
   const getAllFriendUser = async () => {
     try {
       const response = await get("/contacts/get-friends");
       if (response.status === 200) {
         setData(response.data);
-        console.log("list friend : ", response.data);
       }
     } catch (error) {
-      console.log("error get list friend : ", error);
     }
   }
 
@@ -74,21 +60,19 @@ const ListFriend = () => {
     setSortBy(type);
   };
 
-  const handleGoChat = useCallback(
-    async (id) => {
-      try {
-        const response = await post("/conversations", {
-          participantIds: [id],
-        });
+  const handleGoChat = async (id) => {
+    try {
+      const response = await post("/conversations", {
+        participantIds: [id],
+      });
 
-        if (response.status === 201) {
-          setConversationId(response.data.id);
-          return navigate("/");
-        }
-      } catch (error) { }
-    },
-    [setConversationId]
-  );
+      if (response.status === 201) {
+        setConversationId(response.data.id);
+        return navigate("/");
+      }
+    } catch (error) { }
+
+  };
 
   const handleRemoveFriend = async (id) => {
     try {
@@ -110,7 +94,6 @@ const ListFriend = () => {
         }, 1000);
       }
     } catch (error) {
-      console.log("Error remove friend : ", error);
     }
   }
 
@@ -185,7 +168,7 @@ const ListFriend = () => {
                       <Text fontSize="sm" fontStyle="italic">Email: {item.friend.email}</Text>
                     </Box>
                     <Flex>
-                    <Button
+                      <Button
                         aria-label="info"
                         colorScheme="blue"
                         onClick={() => handleGetInfo(item)}
@@ -194,7 +177,7 @@ const ListFriend = () => {
                       <Button
                         aria-label="Chat"
                         colorScheme="teal"
-                        onClick={() => handleGoChat(item.id)}
+                        onClick={() => handleGoChat(item.friendId)}
                         mr={2}
                       >Chat</Button>
                       <Button
@@ -210,7 +193,7 @@ const ListFriend = () => {
             </Box>
           )))
         }
-        <FriendModal isOpen={isModalOpen} onClose={handleCloseModal} friend={selectedFriend}/>
+        <FriendModal isOpen={isModalOpen} onClose={handleCloseModal} friend={selectedFriend} />
         <Box px={3}
           style={{
             width: "100%",

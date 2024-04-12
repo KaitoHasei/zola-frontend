@@ -25,16 +25,13 @@ const FriendRequest = () => {
       const response = await get("/contacts/get-friends-request");
       if (response.status === 200) {
         setData(response.data);
-        console.log("Data requested : ", response.data);
       }
     } catch (error) {
-      console.log("Error get list friend requested : ", error);
     }
   }
   const handleAceptFriend = async (id) => {
     try {
       const response = await post("/contacts/acept-request", { id });
-      console.log(response)
       if (response.status === 200) {
         setMess('Accept successfully !');
         setStatusMess('success');
@@ -93,7 +90,6 @@ const FriendRequest = () => {
         }, 1000);
       }
     } catch (error) {
-      console.log("Error remove friend : ", error);
     }
   }
 
@@ -150,15 +146,15 @@ const FriendRequest = () => {
         <hr style={{ width: '100%' }} />
       </Box>
       <Box overflowY="scroll" height="calc(100vh - 120px)">
-        <Box bg='teal.20'>
-          <Flex bg='teal.20' direction="row">
-            {sortedData.length <= 0 ?
-              (<Box w='100%' p={5}>
-                <Flex justifyContent='center' alignContent='center' >
-                  <Text textAlign='center'>Not exists new requirement !</Text>
-                </Flex>
-              </Box>) :
-              (sortedData.map(item => (
+        {sortedData.length <= 0 ?
+          (<Box w='100%' p={5}>
+            <Flex justifyContent='center' alignContent='center' >
+              <Text textAlign='center'>Not exists new requirement !</Text>
+            </Flex>
+          </Box>) :
+          (sortedData.map(item => (
+            <Box bg='teal.20'>
+              <Flex bg='teal.20' direction="row">
                 <Box key={item.id} p={4} mt={4} borderRadius="lg" boxShadow="md" bg="white" w='100%'>
                   <Flex justifyContent='center' mx={4}>
                     <Box>
@@ -186,10 +182,10 @@ const FriendRequest = () => {
                     </Flex>
                   </Flex>
                 </Box>
-              )))
-            }
-          </Flex>
-        </Box>
+
+              </Flex>
+            </Box>)))
+        }
         <FriendModal isOpen={isModalOpen} onClose={handleCloseModal} friend={selectedFriend} />
         <Box px={3}
           style={{
