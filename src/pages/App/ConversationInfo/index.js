@@ -15,6 +15,7 @@ import {
   ModalContent,
   ModalBody,
   useDisclosure,
+  AvatarGroup,
 } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import { del, get, post } from "#/axios";
@@ -101,11 +102,26 @@ const ConversationInfo = ({
               justifyContent="center"
               alignItems="center"
             >
-              <Avatar
-                size="xl"
-                src={getConversationAvatar(conversation, user.id)}
-                bg="gray.400"
-              />
+              {conversation?.isGroup ? (
+                <AvatarGroup
+                  size="sm"
+                  width="100%"
+                  flexWrap="wrap-reverse"
+                  max={3}
+                >
+                  {getConversationAvatar(conversation, user.id)?.map(
+                    (item, index) => (
+                      <Avatar key={index} src={item} />
+                    )
+                  )}
+                </AvatarGroup>
+              ) : (
+                <Avatar
+                  src={getConversationAvatar(conversation, user.id)}
+                  size="lg"
+                  bg="gray.400"
+                />
+              )}
               <Text fontSize="lg" fontWeight="bold" marginTop="2">
                 {formatConversationName(conversation, user.id)}
               </Text>
