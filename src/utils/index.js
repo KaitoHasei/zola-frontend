@@ -14,6 +14,7 @@ export const formatConversationName = (conversation, userId) => {
     ?.map((participant) => participant?.displayName)
     ?.join(", ");
 
+    console.log("conv : ", conversation);
   return conversationName;
 };
 

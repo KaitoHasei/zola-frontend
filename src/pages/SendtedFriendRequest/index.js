@@ -6,7 +6,7 @@ import moment from 'moment';
 import CustomAlert from '#/CustomAlert';
 import FriendModal from '#/components/FriendModal';
 
-const FriendRequest = () => {
+const SentedFriendRequest = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('time');
   const [data, setData] = useState([]);
@@ -16,38 +16,41 @@ const FriendRequest = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState(null);
 
+
   useEffect(() => {
     getFriendRequest();
   }, []);
 
   const getFriendRequest = async () => {
     try {
-      const response = await get("/contacts/get-friends-request");
+      const response = await get("/contacts/get-friend-requested");
       if (response.status === 200) {
         setData(response.data);
       }
     } catch (error) {
     }
   }
-  const handleAceptFriend = async (id) => {
+
+  const handleCancelRequest = async(id) => {
     try {
-      const response = await post("/contacts/acept-request", { id });
+      const response = await post("/contacts/remove-friend", { id });
       if (response.status === 200) {
-        setMess('Accept successfully !');
+        setMess('Cancel successfully !');
         setStatusMess('success');
         setAlt(true);
         setTimeout(() => {
           setAlt(false);
         }, 1000);
-        setData(sortedData.filter(item => item.id !== id))
+        getFriendRequest();
+      } else {
+        setMess('Error cancel friend !');
+        setStatusMess('error');
+        setAlt(true);
+        setTimeout(() => {
+          setAlt(false);
+        }, 1000);
       }
     } catch (error) {
-      setMess('Error accept !');
-      setStatusMess('error');
-      setAlt(true);
-      setTimeout(() => {
-        setAlt(false);
-      }, 1000);
     }
   }
 
@@ -69,29 +72,6 @@ const FriendRequest = () => {
     }
     return 0;
   });
-
-  const handleRemoveFriend = async (id) => {
-    try {
-      const response = await post("/contacts/remove-friend", { id });
-      if (response.status === 200) {
-        setMess('Remove successfully !');
-        setStatusMess('success');
-        setAlt(true);
-        setTimeout(() => {
-          setAlt(false);
-        }, 1000);
-        getFriendRequest();
-      } else {
-        setMess('Error remove friend !');
-        setStatusMess('error');
-        setAlt(true);
-        setTimeout(() => {
-          setAlt(false);
-        }, 1000);
-      }
-    } catch (error) {
-    }
-  }
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
@@ -115,8 +95,8 @@ const FriendRequest = () => {
         borderBottom: '1px solid gray'
       }}>
         <Flex align='center' h="60px" direction='row' color="black" p={5}>
-          <Icon icon="mdi:email-plus-outline" width='40px' height='25px' />
-          <Text >Pending Friend Requests</Text>
+          <Icon icon="material-symbols-light:schedule-send-outline-rounded" width='40px' height='25px' style={{ color: "#23b3a9" }} />
+          <Text>Sent Friend Requests List</Text>
         </Flex>
       </Box>
       <Box>
@@ -142,10 +122,10 @@ const FriendRequest = () => {
       </Box>
       <Box>
         <hr style={{ width: '100%', height: 15 }} />
-        <Text pl={5} as='b'>{`Friend request(${sortedData.length})`}</Text>
+        <Text pl={5} as='b'>{`Requested(${sortedData.length})`}</Text>
         <hr style={{ width: '100%' }} />
       </Box>
-      <Box overflowY="scroll" height="calc(100vh - 120px)">
+      <Box overflowY="scroll" height="calc(100vh - 180px)">
         {sortedData.length <= 0 ?
           (<Box w='100%' p={5}>
             <Flex justifyContent='center' alignContent='center' >
@@ -171,36 +151,32 @@ const FriendRequest = () => {
                       <Button onClick={() => handleGetInfo(item)} bg="blue" color="white" _hover={{ bg: 'teal.600' }} mr={2}>
                         info
                       </Button>
-                      <Button onClick={() => handleAceptFriend(item.id)} bg="teal.500" color="white" _hover={{ bg: 'teal.600' }} mr={2}>
-                        Acept
+                      <Button onClick={() => handleCancelRequest(item.id)} bg="gray" color="white" _hover={{ bg: 'teal.600' }}>
+                        Cancle
                       </Button>
-                      <Button
-                        aria-label="Delete Friend"
-                        colorScheme="gray"
-                        onClick={() => handleRemoveFriend(item.id)}
-                      >Remove</Button>
                     </Flex>
+
                   </Flex>
                 </Box>
-
               </Flex>
-            </Box>)))
+            </Box>
+          )))
         }
-        <FriendModal isOpen={isModalOpen} onClose={handleCloseModal} friend={selectedFriend} />
-        <Box px={3}
-          style={{
-            width: "100%",
-            height: '55px',
-            position: 'fixed',
-            bottom: 0,
-            right: '10px',
-            zIndex: '9999'
-          }}>
-          {alt ? (<CustomAlert message={mess} status={statusMess} style={{ position: 'fixed', bottom: '10px', right: '10px', zIndex: '9999' }} />) : null}
-        </Box>
+      </Box>
+      <FriendModal isOpen={isModalOpen} onClose={handleCloseModal} friend={selectedFriend} />
+      <Box px={3}
+        style={{
+          width: "100%",
+          height: '55px',
+          position: 'fixed',
+          bottom: 0,
+          right: '10px',
+          zIndex: '9999'
+        }}>
+        {alt ? (<CustomAlert message={mess} status={statusMess} style={{ position: 'fixed', bottom: '10px', right: '10px', zIndex: '9999' }} />) : null}
       </Box>
     </div >
   )
 }
 
-export default FriendRequest;
+export default SentedFriendRequest

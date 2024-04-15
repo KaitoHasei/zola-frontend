@@ -32,6 +32,7 @@ const AppLayout = () => {
   const [isSearch, setSearch] = useState(false);
   const [listUser, setListUser] = useState([]);
   const [view, setView] = useState(VIEW_CHAT);
+  const [dataSearch, setDataSearch] = useState([]);
 
   // call api get data
   useEffect(() => {
@@ -43,10 +44,21 @@ const AppLayout = () => {
           setUser(me?.data);
         }
       };
-
       getData();
     } catch (error) { }
   }, [setUser]);
+
+  const getListFriend = async () => {
+    const response = await get("/contacts/get-friends-user");
+    if (response.status === 200) {
+      setDataSearch(response.data);
+      console.log("response : ", response);
+    }
+  }
+
+  useEffect(() => {
+    isSearch ? getListFriend() : setDataSearch([]);
+  }, [isSearch]);
 
   // connect with root socket
   useEffect(() => {
@@ -71,14 +83,14 @@ const AppLayout = () => {
 
   const handleLiveSearch = (event) => {
     const { value } = event?.target;
-
     if (!value.trim()) return;
-
-    get(`/users?email=${value}`)
-      .then((res) => {
-        setListUser(res?.data?.list);
-      })
-      .catch((error) => { });
+    const filteredData = dataSearch?.filter((item) => {
+      if (item?.displayName.toLowerCase().includes(value?.toLowerCase()) || item?.email.toLowerCase().includes(value?.toLowerCase())) {
+        return true;
+      }
+      return false;
+    })
+    setListUser(filteredData);
   };
 
   const handleClickUserSearched = useCallback(
@@ -97,7 +109,7 @@ const AppLayout = () => {
     [setConversationId]
   );
 
-  const debounceLiveSearch = _.debounce(handleLiveSearch, 300);
+  /* const debounceLiveSearch = _.debounce(handleLiveSearch, 300); */
 
   const renderMainSidebar = useMemo(() => {
     const viewByPath = {
@@ -155,7 +167,7 @@ const AppLayout = () => {
               }}
               marginBottom={4}
             >
-                <ModelUser />
+              <ModelUser />
             </Box>
             <Tooltip placement='auto-start' label='Chat'>
               <Link to="/">
@@ -271,7 +283,8 @@ const AppLayout = () => {
                   my="10px"
                   placeholder="Find people with email"
                   onFocus={() => setSearch(true)}
-                  onChange={debounceLiveSearch}
+                  /* onChange={debounceLiveSearch} */
+                  onChange={handleLiveSearch}
                 />
               </Box>
             </Box>

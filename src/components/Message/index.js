@@ -152,12 +152,12 @@ const Message = ({
               _hover={{ cursor: "pointer" }}
             />
             <MenuList>
-              <MenuItem
+              {isSender && <MenuItem
                 icon={<Icon icon="tabler:trash" />}
                 onClick={handleClickRevoke}
               >
                 Revoke
-              </MenuItem>
+              </MenuItem>}
             </MenuList>
           </Menu>
         </Flex>
