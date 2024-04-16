@@ -17,6 +17,7 @@ import {
   IconButton,
   HStack,
   Textarea,
+  Button,
 } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
@@ -46,6 +47,44 @@ function App() {
   const [images, setImages] = useState([]);
   const [messages, setMessages] = useState([]);
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
+  const [replyTo, setReplyTo] = useState(null);
+
+  const startReply = (message) => {
+    setReplyTo(message);
+  };
+
+  const cancelReply = () => {
+    setReplyTo(null);
+  };
+
+  const sendReply = (newMessageContent) => {
+    // Here you would eventually integrate with your backend
+    console.log(
+      `Replying to ${replyTo.content} with new message: ${newMessageContent}`
+    );
+    // After integrating with your backend, you would clear the replyTo state
+    setReplyTo(null);
+  };
+
+  const ReplyPreview = ({ replyTo, onCancelReply }) => {
+    if (!replyTo) return null;
+
+    return (
+      <Box
+        borderWidth="1px"
+        borderColor="gray.300"
+        p={2}
+        borderRadius="lg"
+        mb={2}
+      >
+        <Text fontSize="sm">Replying to {replyTo.sender.displayName}</Text>
+        <Text fontSize="xs">{replyTo.content}</Text>
+        <Button size="xs" onClick={onCancelReply}>
+          Cancel
+        </Button>
+      </Box>
+    );
+  };
 
   // connect with chat socket
   useEffect(() => {
@@ -127,9 +166,13 @@ function App() {
 
   const handleSendMessage = useCallback(() => {
     const message = inputRef.current.value.trim();
-
+    if (replyTo) {
+      // Implement sending a reply here
+      // Need to include the `replyTo.cuid` or other identifying info
+      sendReply(message);
+    }
     inputRef.current.value = "";
-
+    setReplyTo(null);
     if (!_.isEmpty(images)) {
       const formData = new FormData();
 
@@ -151,7 +194,7 @@ function App() {
     return post(`/conversations/${conversationId}/messages`, {
       content: message,
     });
-  }, [conversationId, images]);
+  }, [replyTo, conversationId, images]);
 
   const handleRevokeMessage = (messageCuid) => {
     if (!messageCuid) return;
@@ -247,6 +290,7 @@ function App() {
                 previousSameUser={previousSameUser}
                 nextSameUser={nextSameUser}
                 onRevoke={handleRevokeMessage}
+                startReply={startReply}
               />
             );
           })}
@@ -269,6 +313,7 @@ function App() {
                 _hover={{ backgroundColor: "#e0e2e7" }}
                 onClick={handleClickSelectImage}
               />
+              <ReplyPreview replyTo={replyTo} onCancelReply={cancelReply} />
               <input
                 ref={selectImageRef}
                 style={{ display: "none" }}
