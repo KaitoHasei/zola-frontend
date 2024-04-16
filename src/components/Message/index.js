@@ -25,6 +25,8 @@ const Message = ({
   previousSameUser,
   nextSameUser,
   onRevoke,
+  startReply,
+  repliedTo,
 }) => {
   const handleClickRevoke = () => {
     onRevoke(message.cuid);
@@ -105,6 +107,12 @@ const Message = ({
           height={nextSameUser && "0"}
           bg="gray.400"
         />
+        {repliedTo && (
+          <Box mb={2} p={2} backgroundColor="gray.200" borderRadius="md">
+            <Text fontSize="xs">Replied to {repliedTo.displayName}</Text>
+            <Text fontSize="sm">{repliedTo.content}</Text>
+          </Box>
+        )}
         {message?.typeMessage === "TEXT" ? (
           <Text
             maxW="50%"
@@ -151,13 +159,22 @@ const Message = ({
               borderRadius="100%"
               _hover={{ cursor: "pointer" }}
             />
-            <MenuList>
-              {isSender && <MenuItem
-                icon={<Icon icon="tabler:trash" />}
-                onClick={handleClickRevoke}
+            <MenuList margin="-10px 0 0 0">
+              {isSender && (
+                <MenuItem
+                  icon={<Icon icon="tabler:trash" />}
+                  onClick={handleClickRevoke}
+                >
+                  Revoke
+                </MenuItem>
+              )}
+              {/* creating reply item to reply message */}
+              <MenuItem
+                icon={<Icon icon="ph:quotes-bold" />}
+                onClick={() => startReply(message)}
               >
-                Revoke
-              </MenuItem>}
+                Reply
+              </MenuItem>
             </MenuList>
           </Menu>
         </Flex>

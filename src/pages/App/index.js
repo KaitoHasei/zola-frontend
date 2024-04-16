@@ -17,6 +17,7 @@ import {
   IconButton,
   HStack,
   Textarea,
+  VStack,
 } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
@@ -46,6 +47,78 @@ function App() {
   const [images, setImages] = useState([]);
   const [messages, setMessages] = useState([]);
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
+  const [replyTo, setReplyTo] = useState(null);
+
+// Function to find the sender based on userId
+const _getSender = (userId) => {
+  return _.find(conversation?.participants, (participant) => {
+    return participant?.id === userId;
+  });
+};
+
+const startReply = (message) => {
+  const sender = _getSender(message.userId);
+  setReplyTo({
+    ...message,
+    sender: sender // Now the sender object is included
+  });
+};
+
+  const cancelReply = () => {
+    setReplyTo(null);
+  };
+
+  const sendReply = (newMessageContent) => {
+    // Here you would eventually integrate with your backend
+    const newMessage = {
+      userId: user.id,
+      content: newMessageContent,
+      repliedTo: replyTo ? {
+        userId: replyTo.userId,
+        displayName: replyTo.sender.displayName,
+        content: replyTo.content
+      } : null,
+      // ...other message properties
+    };
+    console.log(
+      `Replying to ${replyTo.content} with new message: ${newMessageContent}`
+    );
+    // Add the new message to your messages array
+    setMessages(prevMessages => [...prevMessages, newMessage]);
+    // After integrating with your backend, you would clear the replyTo state
+    setReplyTo(null);
+  };
+
+  const ReplyPreview = ({ replyTo, onCancelReply }) => {
+    if (!replyTo) return null;
+  
+    // Ensure replyTo.sender is an object before trying to access its properties
+    const senderDisplayName = replyTo.sender ? replyTo.sender.displayName : "Unknown";
+  
+    return (
+      <Box
+        borderWidth="1px"
+        borderColor="gray.300"
+        p={2}
+        borderRadius="lg"
+        mb={2}
+        width="100%"
+        position="relative"
+        background="gray.300"
+      >
+        <Text fontSize="sm">Replying to {senderDisplayName}</Text>
+        <Text fontSize="xs">{replyTo.content}</Text>
+        <IconButton
+                  variant="ghost"
+                  icon={<Icon icon="icons8:cancel" />}
+                  fontSize="24px"
+                  onClick={onCancelReply}
+                  position="absolute"
+                  top="2px" right="2px"
+                />
+      </Box>
+    );
+  };
 
   // connect with chat socket
   useEffect(() => {
@@ -127,9 +200,16 @@ function App() {
 
   const handleSendMessage = useCallback(() => {
     const message = inputRef.current.value.trim();
-
+    if (replyTo) {
+      // Add logic to create a new message object with repliedTo data
+      sendReply(message);
+      // Send newMessage to backend or add it to the state
+      // ...
+      
+      setReplyTo(null); // Clear the reply after sending
+    }
     inputRef.current.value = "";
-
+    setReplyTo(null);
     if (!_.isEmpty(images)) {
       const formData = new FormData();
 
@@ -151,7 +231,7 @@ function App() {
     return post(`/conversations/${conversationId}/messages`, {
       content: message,
     });
-  }, [conversationId, images]);
+  }, [replyTo, conversationId, images]);
 
   const handleRevokeMessage = (messageCuid) => {
     if (!messageCuid) return;
@@ -247,6 +327,8 @@ function App() {
                 previousSameUser={previousSameUser}
                 nextSameUser={nextSameUser}
                 onRevoke={handleRevokeMessage}
+                startReply={startReply}
+                repliedTo={item.repliedTo}
               />
             );
           })}
@@ -292,7 +374,12 @@ function App() {
                 />
               )}
               <Flex alignItems="center">
-                <Textarea
+                <VStack flex="1">
+                  
+                 <ReplyPreview replyTo={replyTo} onCancelReply={cancelReply} />
+                 <HStack width="100%">
+                 <Textarea
+                 flex="1"
                   ref={inputRef}
                   minHeight="auto"
                   size="sm"
@@ -320,6 +407,8 @@ function App() {
                     return setOpenEmojiPicker(false);
                   }}
                 />
+                 </HStack>
+                </VStack>
               </Flex>
             </Box>
             <Box padding="10px">

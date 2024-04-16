@@ -16,9 +16,10 @@ import {
   ModalBody,
   useDisclosure,
   AvatarGroup,
+  IconButton,
 } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
-import { del, get, post } from "#/axios";
+import { get} from "#/axios";
 const ConversationInfo = ({
   user,
   conversation,
@@ -29,10 +30,15 @@ const ConversationInfo = ({
   const [activeView, setActiveView] = useState("default");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isMinimized, setIsMinimized] = useState(false);
   const handleViewChange = (view) => {
     setActiveView(view);
   };
-
+  const toggleMinimize = () => {
+    setIsMinimized(!isMinimized);
+    console.log("Minimize toggled", !isMinimized); // This should log the new state
+  };
+  
   const [images, setImages] = useState([]);
 
   useEffect(() => {
@@ -49,7 +55,7 @@ const ConversationInfo = ({
 
       fetchImages();
     }
-  }, [conversationId, activeView]);
+  }, [conversationId, activeView, isMinimized]);
   const handleImageClick = (imageUrl) => {
     setSelectedImage(imageUrl);
     onOpen();
@@ -88,12 +94,26 @@ const ConversationInfo = ({
   const renderConversationInfo = useMemo(() => {
     return (
       <VStack
-        width="20%"
+        key={isMinimized} 
+        width={isMinimized ? "5%" : "20%"}
         height="100%"
-        padding="1rem 0"
+        padding={isMinimized ? "0.5rem" : "1rem"}
         borderLeft="solid lightgrey 1px"
+        position="relative"
+        overflow={isMinimized ? "hidden" : "auto"}
       >
-        {activeView === "default" && (
+      <IconButton
+  icon={<Icon icon={isMinimized ? "icon-park-twotone:expand-left" : "iconoir:sidebar-collapse"} />}
+  variant="ghost"
+  position="absolute"
+  top="2"
+  right="2"
+  onClick={toggleMinimize}
+  zIndex="1"
+  fontSize="24px"
+/>
+        {!isMinimized && activeView === "default" && (
+          // ... render the rest of panel content only if not minimized
           <VStack width={"100%"}>
             <Box
               width="100%"
@@ -168,8 +188,8 @@ const ConversationInfo = ({
             </VStack>
           </VStack>
         )}
-        ;
-        {activeView === "media" && (
+
+        {!isMinimized && activeView === "media" && (
           <VStack width={"100%"}>
             <HStack
               position="relative"
@@ -194,8 +214,7 @@ const ConversationInfo = ({
             {renderMediaView()}
           </VStack>
         )}
-        ;
-        {activeView === "link" && (
+        {!isMinimized && activeView === "link" && (
           <VStack width={"100%"}>
             <HStack
               position="relative"
@@ -219,8 +238,7 @@ const ConversationInfo = ({
             </HStack>
           </VStack>
         )}
-        ;
-        {activeView === "file" && (
+        {!isMinimized && activeView === "file" && (
           <VStack width={"100%"}>
             <HStack
               position="relative"
@@ -244,10 +262,9 @@ const ConversationInfo = ({
             </HStack>
           </VStack>
         )}
-        ;
       </VStack>
     );
-  }, [user, conversation, activeView, images]);
+  }, [user, conversation, activeView, images, isMinimized]);
 
   return (
     <>
