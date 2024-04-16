@@ -26,6 +26,7 @@ const Message = ({
   nextSameUser,
   onRevoke,
   startReply,
+  repliedTo,
 }) => {
   const handleClickRevoke = () => {
     onRevoke(message.cuid);
@@ -106,6 +107,12 @@ const Message = ({
           height={nextSameUser && "0"}
           bg="gray.400"
         />
+        {repliedTo && (
+          <Box mb={2} p={2} backgroundColor="gray.200" borderRadius="md">
+            <Text fontSize="xs">Replied to {repliedTo.displayName}</Text>
+            <Text fontSize="sm">{repliedTo.content}</Text>
+          </Box>
+        )}
         {message?.typeMessage === "TEXT" ? (
           <Text
             maxW="50%"
