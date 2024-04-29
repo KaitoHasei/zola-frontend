@@ -1,4 +1,8 @@
 /* eslint-disable no-useless-escape */
+const emailRegex = new RegExp(
+  /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+  "gm"
+);
 const requiredValidation = { required: "This field is require!" };
 const authValidation = {
   username: { ...requiredValidation },
@@ -23,4 +27,4 @@ const authValidation = {
   },
 };
 
-export { requiredValidation, authValidation };
+export { emailRegex, requiredValidation, authValidation };

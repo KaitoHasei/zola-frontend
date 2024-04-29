@@ -6,8 +6,22 @@ import {
   useRef,
   useState,
 } from "react";
-import { Outlet } from "react-router-dom";
-import { Box, Heading, Input, Spinner } from "@chakra-ui/react";
+import { Outlet, useNavigate } from "react-router-dom";
+import {
+  Avatar,
+  Box,
+  Flex,
+  Heading,
+  IconButton,
+  Input,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Spinner,
+  Stack,
+  useDisclosure,
+} from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
 
@@ -17,13 +31,34 @@ import { getSocket } from "#/socket";
 import { GlobalContext } from "#/contexts/GlobalContext";
 import { SocketContext } from "#/contexts/SocketContext";
 
+import { emailRegex } from "../Form/validatePattern";
 import UserSearched from "./SearchResult";
+import ModalUser from "./ModalUser";
 import ConversationList from "./ConversationList";
+import ModalSearchUser from "./ModalSearchUser";
+
+import { VIEW_CONSTANT } from "./Constant";
+import ContactManagement from "./ContactManagement";
 
 const AppLayout = () => {
-  const { user, setUser, setConversationId } = useContext(GlobalContext);
+  const navigate = useNavigate();
+  const {
+    isOpen: isModalUserOpen,
+    onOpen: onOpenModalUser,
+    onClose: onCloseModalUser,
+  } = useDisclosure();
+  const {
+    isOpen: isModalSearchUserOpen,
+    onOpen: onOpenModalSearchUser,
+    onClose: onCloseModalSearchUser,
+  } = useDisclosure();
+
+  const { user, setUser, setConversationId, logOut } =
+    useContext(GlobalContext);
   const { setSocket } = useContext(SocketContext);
   const searchRef = useRef(null);
+
+  const [viewName, setViewName] = useState(VIEW_CONSTANT.CHAT);
   const [isSearch, setSearch] = useState(false);
   const [listUser, setListUser] = useState([]);
 
@@ -68,11 +103,19 @@ const AppLayout = () => {
 
     if (!value.trim()) return;
 
-    get(`/users?email=${value}`)
-      .then((res) => {
-        setListUser(res?.data?.list);
-      })
-      .catch((error) => {});
+    const isEmail = emailRegex.test(value);
+
+    if (isEmail) {
+      get(`/users?email=${value}`)
+        .then((res) => {
+          if (!_.isEmpty(res.data)) setListUser([res.data]);
+        })
+        .catch((error) => {});
+
+      return;
+    }
+
+    return;
   };
 
   const handleClickUserSearched = useCallback(
@@ -91,11 +134,21 @@ const AppLayout = () => {
     [setConversationId]
   );
 
+  const handleClickUserInfo = () => {
+    onOpenModalUser();
+  };
+
+  const handleLogout = () => {
+    logOut();
+    return navigate("/login");
+  };
+
   const debounceLiveSearch = _.debounce(handleLiveSearch, 300);
 
   const renderMainSidebar = useMemo(() => {
     const viewByPath = {
-      "/": () => <ConversationList />,
+      [VIEW_CONSTANT.CHAT]: () => <ConversationList />,
+      [VIEW_CONSTANT.CONTACT]: () => <ContactManagement />,
     };
 
     return (
@@ -112,11 +165,11 @@ const AppLayout = () => {
               ))}
           </Box>
         ) : (
-          <>{viewByPath[window.location.pathname]()}</>
+          <>{viewByPath[viewName]()}</>
         )}
       </>
     );
-  }, [isSearch, listUser, handleClickUserSearched]);
+  }, [viewName, isSearch, listUser, handleClickUserSearched]);
 
   return (
     <>
@@ -125,81 +178,165 @@ const AppLayout = () => {
           <Spinner margin="auto" size="xl" color="teal.500" />
         </Box>
       ) : (
-        <Box height="100%" display="flex">
-          <Box
-            width={"60px"}
-            padding="10px 5px"
-            display="flex"
-            flexDirection="column"
-            border="1px solid #e5e5e5"
-          >
-            <Box
-              width="100%"
-              aspectRatio={1}
-              display="flex"
-              justifyContent="center"
+        <>
+          <Flex height="100%">
+            <Stack
+              width={"60px"}
               alignItems="center"
-              fontSize="28px"
-              borderRadius="10px"
-              _hover={{
-                cursor: "pointer",
-                backgroundColor: "rgba(0, 0, 0, 0.05)",
-              }}
+              gap={3}
+              padding="10px 5px"
+              border="1px solid #e5e5e5"
             >
-              <Icon icon="bi:chat-fill" />
-            </Box>
-          </Box>
-          <Box
-            width={"360px"}
-            display="flex"
-            flexDirection="column"
-            border="1px solid #e5e5e5"
-          >
-            <Box
-              paddingX="10px"
-              paddingY="5px"
-              borderBottom="1px solid #e5e5e5"
-            >
-              <Heading size="lg">Chat</Heading>
-              <Box display="flex" alignItems="center">
-                {isSearch && (
-                  <Box
-                    height="30px"
-                    marginRight="10px"
-                    aspectRatio={1}
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    fontSize="20px"
-                    borderRadius="100%"
-                    _hover={{
-                      cursor: "pointer",
-                      backgroundColor: "rgba(0, 0, 0, 0.05)",
-                    }}
-                    onClick={() => {
-                      searchRef.current.value = "";
-                      setSearch(false);
-                      setListUser([]);
-                    }}
-                  >
-                    <Icon icon="ion:arrow-back" />
-                  </Box>
-                )}
-                <Input
-                  ref={searchRef}
-                  my="10px"
-                  placeholder="Find people with email"
-                  onFocus={() => setSearch(true)}
-                  onChange={debounceLiveSearch}
+              <Box>
+                <Menu placement="right-end">
+                  <MenuButton>
+                    <Avatar
+                      src={user?.photoUrl ? user.photoUrl : ""}
+                      _hover={{ cursor: "pointer" }}
+                    />
+                  </MenuButton>
+                  <MenuList>
+                    <MenuItem
+                      icon={<Icon icon="mingcute:user-info-fill" />}
+                      onClick={handleClickUserInfo}
+                    >
+                      User Information
+                    </MenuItem>
+                    <MenuItem
+                      icon={<Icon icon="material-symbols:logout" />}
+                      color="red.500"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
+              </Box>
+              <Box
+                width="100%"
+                aspectRatio={1}
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                borderRadius="10px"
+                _hover={{
+                  cursor: "pointer",
+                  backgroundColor: "rgba(0, 0, 0, 0.05)",
+                }}
+                onClick={() => {
+                  navigate("/");
+                  setViewName(VIEW_CONSTANT.CHAT);
+                }}
+              >
+                <Icon
+                  style={{ fontSize: "36px" }}
+                  icon={
+                    viewName === VIEW_CONSTANT.CHAT
+                      ? "mdi:chat"
+                      : "mdi:chat-outline"
+                  }
                 />
               </Box>
+              <Box
+                width="100%"
+                aspectRatio={1}
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                borderRadius="10px"
+                _hover={{
+                  cursor: "pointer",
+                  backgroundColor: "rgba(0, 0, 0, 0.05)",
+                }}
+                onClick={() => {
+                  navigate("/contact");
+                  setViewName(VIEW_CONSTANT.CONTACT);
+                }}
+              >
+                <Icon
+                  style={{ fontSize: "36px" }}
+                  icon={
+                    viewName === VIEW_CONSTANT.CONTACT
+                      ? "fluent:book-contacts-32-filled"
+                      : "fluent:book-contacts-32-regular"
+                  }
+                />
+              </Box>
+            </Stack>
+            <Stack width={"360px"} border="1px solid #e5e5e5">
+              <Box
+                paddingX="10px"
+                paddingY="5px"
+                borderBottom="1px solid #e5e5e5"
+              >
+                <Heading size="lg">Chat</Heading>
+                <Flex alignItems="center" gap={2}>
+                  <Flex alignItems="center" flex={1}>
+                    {isSearch && (
+                      <Box
+                        height="30px"
+                        marginRight="10px"
+                        aspectRatio={1}
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        fontSize="20px"
+                        borderRadius="100%"
+                        _hover={{
+                          cursor: "pointer",
+                          backgroundColor: "rgba(0, 0, 0, 0.05)",
+                        }}
+                        onClick={() => {
+                          searchRef.current.value = "";
+                          setSearch(false);
+                          setListUser([]);
+                        }}
+                      >
+                        <Icon icon="ion:arrow-back" />
+                      </Box>
+                    )}
+                    <Input
+                      ref={searchRef}
+                      my="10px"
+                      placeholder="Search"
+                      onFocus={() => setSearch(true)}
+                      onChange={debounceLiveSearch}
+                    />
+                  </Flex>
+                  <Box>
+                    <IconButton
+                      variant="ghost"
+                      icon={
+                        <Icon
+                          style={{ fontSize: "24px" }}
+                          icon="iconoir:user-plus"
+                        />
+                      }
+                      onClick={onOpenModalSearchUser}
+                    />
+                  </Box>
+                </Flex>
+              </Box>
+              {renderMainSidebar}
+            </Stack>
+            <Box flex={1}>
+              <Outlet />
             </Box>
-            {renderMainSidebar}
-          </Box>
-          <Box flex={1}>
-            <Outlet />
-          </Box>
-        </Box>
+          </Flex>
+
+          {/* Render ModalUser here */}
+          <ModalUser
+            user={user}
+            isOpen={isModalUserOpen}
+            onClose={onCloseModalUser}
+          />
+
+          {/* Render ModalSearchUser here */}
+          <ModalSearchUser
+            isOpen={isModalSearchUserOpen}
+            onClose={onCloseModalSearchUser}
+          />
+        </>
       )}
     </>
   );
