@@ -1,3 +1,4 @@
+import { post } from '#/axios'
 import AboutModel from '#/components/AboutModel'
 import AccountInfoModal from '#/components/AccountInfoModal'
 import ChangeLanguageModel from '#/components/ChangeLanguageModel'
@@ -18,10 +19,21 @@ const MenuSetting = () => {
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
 
-  const handleLogout = () => {
-    logOut();
-    return navigate('/login');
-  }
+  const handleLogout = async () => {
+    try {
+      await post("/auth/logout", null, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }).finally(() =>
+        logOut()
+      );
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
   return (
     <>
       <Menu placement="right-end">
