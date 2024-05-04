@@ -95,6 +95,13 @@ const Login = () => {
             </Link>
           </Text>
         </Box>
+        <Box marginTop="20px" textAlign="center">
+          <Text>
+            <Link as={ReactRouterLink} to="/forgot-password" color="teal.500">
+              Forgot passwod !
+            </Link>
+          </Text>
+        </Box>
       </Box>
     </Box>
   );

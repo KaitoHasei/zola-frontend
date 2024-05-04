@@ -10,6 +10,7 @@ import FriendRequest from "#/pages/FriendRequest";
 import NotificationList from "#/pages/NotificationList";
 import RegisterSuccess from "#/pages/Register/RegisterSuccess";
 import SentedFriendRequest from "#/pages/SendtedFriendRequest";
+import ForgotPassword from "#/pages/ForgotPassword";
 
 export const routes = [
   {
@@ -27,19 +28,19 @@ export const routes = [
       },
       {
         path: "/list-group",
-        element: <ListGroup/>
+        element: <ListGroup />
       },
       {
         path: "/list-friend-request",
-        element: <FriendRequest/>
+        element: <FriendRequest />
       },
       {
-        path : "/list-sented-friend",
-        element: <SentedFriendRequest/>
+        path: "/list-sented-friend",
+        element: <SentedFriendRequest />
       },
       {
         path: "/notification",
-        element: <NotificationList/>
+        element: <NotificationList />
       }
     ],
   },
@@ -67,4 +68,12 @@ export const routes = [
       </ProtectAuthRoutes>
     ),
   },
+  {
+    path: "/forgot-password",
+    element: (
+      <ProtectAuthRoutes redirectPath="/">
+        <ForgotPassword />
+      </ProtectAuthRoutes>
+    ),
+  }
 ];
