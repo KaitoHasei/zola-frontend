@@ -7,7 +7,7 @@ import { useContext, useState } from "react";
 const ModelUser = () => {
   const { user, setUser } = useContext(GlobalContext);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [newAvt, setNewAvt] = useState(null);
+  const [file, setFile] = useState(null);
   const [edit, setEdit] = useState(false);
   const [avtUrl, setAvtUrl] = useState(user?.photoUrl || "");
   const [displayName, setDisplayName] = useState(user?.displayName || "");
@@ -35,15 +35,21 @@ const ModelUser = () => {
   }
   const handleChangeAvt = (event) => {
     const selectedAvt = event.target.files[0];
-    setNewAvt(selectedAvt);
+    setFile(selectedAvt);
     const tempAvtUrl = URL.createObjectURL(selectedAvt);
     setAvtUrl(tempAvtUrl);
   };
 
   const handleUpdateAvt = async () => {
-    if (avtUrl !== user.photoUrl) {
+    if (file) {
       try {
-        const response = await post('/users/avatar', newAvt);
+        const data = new FormData();
+        data.append("avatar", file)
+        const response = await post('/users/avatar', data, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
         if (response?.status === 200) {
           setAvtUrl(response.photoUrl);
           return true;
@@ -55,11 +61,12 @@ const ModelUser = () => {
   }
   const handleUpdateUserInfo = async () => {
     setIsLoading(true);
-    const upImage = handleUpdateAvt();
-    if (upImage) {
+    if (file) {
+      await handleUpdateAvt();
+    }
+    if (file) {
       try {
         const data = {
-          photoUrl: avtUrl,
           displayName: displayName,
           dob: dob,
           bio: bio
@@ -70,7 +77,6 @@ const ModelUser = () => {
           setAlt(true);
           setMess("Update success !");
           setStatusMess('success');
-          // aanr lert
           setTimeout(() => {
             setAlt(false);
           }, 3000);
@@ -91,7 +97,6 @@ const ModelUser = () => {
         setAlt(false);
       }, 3000);
     }
-    /* onClose(); */
     setIsLoading(false);
   };
   return (
@@ -127,11 +132,10 @@ const ModelUser = () => {
                   </Button>
                 </label>
               </Tooltip>
-
               <input
                 id='avatar-upload'
                 type='file'
-                accept='image/*'
+                accept='image/**'
                 style={{ display: 'none' }}
                 onChange={handleChangeAvt}
               />
