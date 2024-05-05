@@ -36,6 +36,7 @@ import { SocketContext } from "#/contexts/SocketContext";
 import PreviewImageUpload from "#/components/PreviewImageUpload";
 import ConversationInfo from "./ConversationInfo";
 import EmojiPicker from "emoji-picker-react";
+import ConversationAvatar from "#/components/Conversation/ConversationAvatar";
 function App() {
   const { user, conversationId } = useContext(GlobalContext);
   const { socket, setSocket } = useContext(SocketContext);
@@ -49,20 +50,20 @@ function App() {
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
   const [replyTo, setReplyTo] = useState(null);
 
-// Function to find the sender based on userId
-const _getSender = (userId) => {
-  return _.find(conversation?.participants, (participant) => {
-    return participant?.id === userId;
-  });
-};
+  // Function to find the sender based on userId
+  const _getSender = (userId) => {
+    return _.find(conversation?.participants, (participant) => {
+      return participant?.id === userId;
+    });
+  };
 
-const startReply = (message) => {
-  const sender = _getSender(message.userId);
-  setReplyTo({
-    ...message,
-    sender: sender // Now the sender object is included
-  });
-};
+  const startReply = (message) => {
+    const sender = _getSender(message.userId);
+    setReplyTo({
+      ...message,
+      sender: sender, // Now the sender object is included
+    });
+  };
 
   const cancelReply = () => {
     setReplyTo(null);
@@ -73,28 +74,29 @@ const startReply = (message) => {
     const newMessage = {
       userId: user.id,
       content: newMessageContent,
-      repliedTo: replyTo ? {
-        userId: replyTo.userId,
-        displayName: replyTo.sender.displayName,
-        content: replyTo.content
-      } : null,
+      repliedTo: replyTo
+        ? {
+            userId: replyTo.userId,
+            displayName: replyTo.sender.displayName,
+            content: replyTo.content,
+          }
+        : null,
       // ...other message properties
     };
-    console.log(
-      `Replying to ${replyTo.content} with new message: ${newMessageContent}`
-    );
     // Add the new message to your messages array
-    setMessages(prevMessages => [...prevMessages, newMessage]);
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
     // After integrating with your backend, you would clear the replyTo state
     setReplyTo(null);
   };
 
   const ReplyPreview = ({ replyTo, onCancelReply }) => {
     if (!replyTo) return null;
-  
+
     // Ensure replyTo.sender is an object before trying to access its properties
-    const senderDisplayName = replyTo.sender ? replyTo.sender.displayName : "Unknown";
-  
+    const senderDisplayName = replyTo.sender
+      ? replyTo.sender.displayName
+      : "Unknown";
+
     return (
       <Box
         borderWidth="1px"
@@ -109,13 +111,14 @@ const startReply = (message) => {
         <Text fontSize="sm">Replying to {senderDisplayName}</Text>
         <Text fontSize="xs">{replyTo.content}</Text>
         <IconButton
-                  variant="ghost"
-                  icon={<Icon icon="icons8:cancel" />}
-                  fontSize="24px"
-                  onClick={onCancelReply}
-                  position="absolute"
-                  top="2px" right="2px"
-                />
+          variant="ghost"
+          icon={<Icon icon="icons8:cancel" />}
+          fontSize="24px"
+          onClick={onCancelReply}
+          position="absolute"
+          top="2px"
+          right="2px"
+        />
       </Box>
     );
   };
@@ -148,11 +151,9 @@ const startReply = (message) => {
   // call api get data of conversation
   useEffect(() => {
     if (conversationId) {
-      get(`/conversations/${conversationId}`).then((res) =>{
-        setConversation(res?.data)
-        console.log("res call : ", res?.data);
-      }
-      );
+      get(`/conversations/${conversationId}`).then((res) => {
+        setConversation(res?.data);
+      });
       get(`/conversations/${conversationId}/messages?pageSize=20`).then(
         (res) => {
           setMessages(res?.data?.message || []);
@@ -205,7 +206,7 @@ const startReply = (message) => {
       sendReply(message);
       // Send newMessage to backend or add it to the state
       // ...
-      
+
       setReplyTo(null); // Clear the reply after sending
     }
     inputRef.current.value = "";
@@ -274,21 +275,7 @@ const startReply = (message) => {
       <Flex padding="10px">
         <Flex alignItems="center">
           <Box>
-            {conversation?.isGroup ? (
-              <AvatarGroup size="sm" max={3}>
-                {getConversationAvatar(conversation, user.id)?.map(
-                  (item, index) => (
-                    <Avatar key={index} src={item} />
-                  )
-                )}
-              </AvatarGroup>
-            ) : (
-              <Avatar
-                src={getConversationAvatar(conversation, user.id)}
-                size="sm"
-                bg="gray.400"
-              />
-            )}
+            <ConversationAvatar conversation={conversation} user={user} />
           </Box>
           <Text as="b" noOfLines={1} maxWidth="250px" marginLeft="10px">
             {formatConversationName(conversation, user.id)}
@@ -375,39 +362,42 @@ const startReply = (message) => {
               )}
               <Flex alignItems="center">
                 <VStack flex="1">
-                  
-                 <ReplyPreview replyTo={replyTo} onCancelReply={cancelReply} />
-                 <HStack width="100%">
-                 <Textarea
-                 flex="1"
-                  ref={inputRef}
-                  minHeight="auto"
-                  size="sm"
-                  variant="unstyled"
-                  resize="none"
-                  placeholder="Aa"
-                  _focus={{ borderColor: "unset", boxShadow: "unset" }}
-                  onKeyDown={(keydown) => {
-                    if (!keydown.shiftKey && keydown.code === "Enter")
-                      handleSendMessage();
-                  }}
-                />
-                <EmojiPicker
-                  style={{ position: "absolute", top: "-445px", right: "50px" }}
-                  open={openEmojiPicker}
-                  onEmojiClick={handleClickEmoji}
-                />
-                <IconButton
-                  variant="ghost"
-                  icon={<Icon icon="uil:smile" />}
-                  fontSize="24px"
-                  onClick={() => {
-                    if (!openEmojiPicker) return setOpenEmojiPicker(true);
+                  <ReplyPreview replyTo={replyTo} onCancelReply={cancelReply} />
+                  <HStack width="100%">
+                    <Textarea
+                      flex="1"
+                      ref={inputRef}
+                      minHeight="auto"
+                      size="sm"
+                      variant="unstyled"
+                      resize="none"
+                      placeholder="Aa"
+                      _focus={{ borderColor: "unset", boxShadow: "unset" }}
+                      onKeyDown={(keydown) => {
+                        if (!keydown.shiftKey && keydown.code === "Enter")
+                          handleSendMessage();
+                      }}
+                    />
+                    <EmojiPicker
+                      style={{
+                        position: "absolute",
+                        top: "-445px",
+                        right: "50px",
+                      }}
+                      open={openEmojiPicker}
+                      onEmojiClick={handleClickEmoji}
+                    />
+                    <IconButton
+                      variant="ghost"
+                      icon={<Icon icon="uil:smile" />}
+                      fontSize="24px"
+                      onClick={() => {
+                        if (!openEmojiPicker) return setOpenEmojiPicker(true);
 
-                    return setOpenEmojiPicker(false);
-                  }}
-                />
-                 </HStack>
+                        return setOpenEmojiPicker(false);
+                      }}
+                    />
+                  </HStack>
                 </VStack>
               </Flex>
             </Box>
@@ -454,6 +444,7 @@ const startReply = (message) => {
             getConversationAvatar={getConversationAvatar}
             formatConversationName={formatConversationName}
             conversationId={conversationId}
+            setConversation={setConversation}
           />
         </HStack>
       )}
