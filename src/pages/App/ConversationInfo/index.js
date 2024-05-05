@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import {
   VStack,
   Box,
@@ -17,16 +17,38 @@ import {
   useDisclosure,
   AvatarGroup,
   IconButton,
+  Editable,
+  EditablePreview,
+  Input,
+  EditableInput,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionIcon,
+  AccordionPanel,
+  Flex,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
 } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
-import { get} from "#/axios";
+import { del, get, patch, put } from "#/axios";
+import ConversationAvatar from "#/components/Conversation/ConversationAvatar";
+import ImageGroupPreview from "../ImageGroupPreview";
+import EditableControls from "#/components/EditableControls";
+import _ from "lodash";
+import AddUserGroup from "./AddUserGroup";
 const ConversationInfo = ({
   user,
   conversation,
   getConversationAvatar,
   formatConversationName,
   conversationId,
+  setConversation,
 }) => {
+  const inputGroupImageRef = useRef(null);
+
   const [activeView, setActiveView] = useState("default");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedImage, setSelectedImage] = useState(null);
@@ -36,10 +58,17 @@ const ConversationInfo = ({
   };
   const toggleMinimize = () => {
     setIsMinimized(!isMinimized);
-    console.log("Minimize toggled", !isMinimized); // This should log the new state
   };
-  
+
+  const {
+    isOpen: isImageGroupPreivewOpen,
+    onOpen: onOpenImageGroupPreview,
+    onClose: onCloseImageGroupPreview,
+  } = useDisclosure();
+
   const [images, setImages] = useState([]);
+  const [avatarGroup, setAvatarGroup] = useState(null);
+  const [avatarGroupUrl, setAvatarGroupUrl] = useState(null);
 
   useEffect(() => {
     if (activeView === "media" && conversationId) {
@@ -56,10 +85,116 @@ const ConversationInfo = ({
       fetchImages();
     }
   }, [conversationId, activeView, isMinimized]);
+
+  useEffect(() => {
+    let fileReader,
+      isCancel = false;
+    if (avatarGroup) {
+      fileReader = new FileReader();
+      fileReader.onload = (e) => {
+        const { result } = e.target;
+        if (result && !isCancel) {
+          setAvatarGroupUrl(result);
+        }
+      };
+      fileReader.readAsDataURL(avatarGroup);
+    }
+    return () => {
+      isCancel = true;
+      if (fileReader && fileReader.readyState === 1) {
+        fileReader.abort();
+      }
+    };
+  }, [avatarGroup]);
+
   const handleImageClick = (imageUrl) => {
     setSelectedImage(imageUrl);
     onOpen();
   };
+
+  const handleUpdateGroupImage = () => {
+    if (!conversation.isGroup || conversation.groupOwner !== user.id) return;
+
+    inputGroupImageRef.current.click();
+  };
+
+  const handlePickImage = (event) => {
+    const _image = event.target.files[0];
+
+    event.target.value = "";
+
+    setAvatarGroup(_image);
+    onOpenImageGroupPreview();
+  };
+
+  const handleClickUpdate = async () => {
+    if (!avatarGroup) return;
+
+    const formData = new FormData();
+
+    formData.append("avatar", avatarGroup);
+
+    const response = await patch(
+      `/conversations/${conversation.id}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    setConversation(response.data);
+    onCloseImageGroupPreview();
+  };
+
+  const handleEditName = async (data) => {
+    if (!data.trim() || data.trim() === conversation.groupName) return;
+
+    const response = await put(`/conversations/${conversation.id}`, {
+      groupName: data,
+    });
+
+    setConversation(response.data);
+  };
+
+  const handleRemoveMember = async (item) => {
+    if (_.isEmpty(item)) return;
+
+    try {
+      const response = await del(
+        `/conversations/${conversationId}/group-member/${item?.id}`
+      );
+      const data = response.data;
+
+      setConversation(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const renderEditName = useMemo(() => {
+    const conversationName = formatConversationName(conversation, user.id);
+
+    return (
+      <Editable
+        key={user?.id}
+        // textAlign="center"
+        defaultValue={conversationName}
+        // fontSize="2xl"
+        isPreviewFocusable={false}
+        submitOnBlur={false}
+        onSubmit={handleEditName}
+      >
+        <Box textAlign="center" position="relative">
+          <EditablePreview />
+          {/* Here is the custom input */}
+          <Input as={EditableInput} padding="10px" />
+          <EditableControls />
+        </Box>
+      </Editable>
+    );
+  }, [user, handleEditName]);
 
   const renderMediaView = () => {
     return (
@@ -94,24 +229,32 @@ const ConversationInfo = ({
   const renderConversationInfo = useMemo(() => {
     return (
       <VStack
-        key={isMinimized} 
+        key={isMinimized}
         width={isMinimized ? "5%" : "20%"}
         height="100%"
-        padding={isMinimized ? "0.5rem" : "1rem"}
+        padding="10px 0"
         borderLeft="solid lightgrey 1px"
         position="relative"
         overflow={isMinimized ? "hidden" : "auto"}
       >
-      <IconButton
-  icon={<Icon icon={isMinimized ? "icon-park-twotone:expand-left" : "iconoir:sidebar-collapse"} />}
-  variant="ghost"
-  position="absolute"
-  top="2"
-  right="2"
-  onClick={toggleMinimize}
-  zIndex="1"
-  fontSize="24px"
-/>
+        <IconButton
+          icon={
+            <Icon
+              icon={
+                isMinimized
+                  ? "icon-park-twotone:expand-left"
+                  : "iconoir:sidebar-collapse"
+              }
+            />
+          }
+          variant="ghost"
+          position="absolute"
+          top="2"
+          right="2"
+          onClick={toggleMinimize}
+          zIndex="1"
+          fontSize="24px"
+        />
         {!isMinimized && activeView === "default" && (
           // ... render the rest of panel content only if not minimized
           <VStack width={"100%"}>
@@ -122,29 +265,25 @@ const ConversationInfo = ({
               justifyContent="center"
               alignItems="center"
             >
-              {conversation?.isGroup ? (
-                <AvatarGroup
-                  size="sm"
-                  width="100%"
-                  flexWrap="wrap-reverse"
-                  max={3}
-                >
-                  {getConversationAvatar(conversation, user.id)?.map(
-                    (item, index) => (
-                      <Avatar key={index} src={item} />
-                    )
-                  )}
-                </AvatarGroup>
-              ) : (
-                <Avatar
-                  src={getConversationAvatar(conversation, user.id)}
-                  size="lg"
-                  bg="gray.400"
+              <Box cursor="pointer" onClick={handleUpdateGroupImage}>
+                <ConversationAvatar conversation={conversation} user={user} />
+                <input
+                  ref={inputGroupImageRef}
+                  type="file"
+                  accept="image/jpeg, image/jpg, image/png"
+                  hidden={true}
+                  onChange={handlePickImage}
+                />
+              </Box>
+              {conversation.isGroup &&
+                conversation.groupOwner === user.id &&
+                renderEditName}
+              {conversation?.isGroup && conversation.groupOwner === user.id && (
+                <AddUserGroup
+                  conversation={conversation}
+                  setConversation={setConversation}
                 />
               )}
-              <Text fontSize="lg" fontWeight="bold" marginTop="2">
-                {formatConversationName(conversation, user.id)}
-              </Text>
             </Box>
             <VStack
               padding="0.5rem 0"
@@ -262,6 +401,80 @@ const ConversationInfo = ({
             </HStack>
           </VStack>
         )}
+        {!isMinimized && conversation?.isGroup && (
+          <Accordion allowMultiple width="100%">
+            <AccordionItem>
+              <AccordionButton>
+                <Text as="b" flex="1" textAlign="left">
+                  Group members
+                </Text>
+                <AccordionIcon />
+              </AccordionButton>
+              <AccordionPanel>
+                {conversation?.participants?.map((item, index) => (
+                  <Box
+                    key={index}
+                    padding="8px"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    _hover={{
+                      cursor: "pointer",
+                    }}
+                    role="group"
+                  >
+                    <Avatar
+                      size="sm"
+                      src={item?.photoUrl ? item.photoUrl : ""}
+                    />
+                    <Box marginLeft="10px" flex={1}>
+                      <Text>{item?.displayName}</Text>
+                    </Box>
+                    {conversation.groupOwner === item?.id && (
+                      <Box>
+                        <Text>🗝️</Text>
+                      </Box>
+                    )}
+                    {conversation.groupOwner !== item?.id && (
+                      <Flex
+                        display="none"
+                        _groupHover={{ display: "flex" }}
+                        height="100%"
+                        alignItems="center"
+                      >
+                        <Menu>
+                          <MenuButton
+                            as={IconButton}
+                            icon={
+                              <Icon
+                                style={{ fontSize: "15px" }}
+                                icon="ri:more-2-fill"
+                              />
+                            }
+                            variant="ghost"
+                            borderRadius="100%"
+                            _hover={{ cursor: "pointer" }}
+                          />
+                          <MenuList margin="-10px 0 0 0">
+                            {conversation.groupOwner === user.id && (
+                              <MenuItem
+                                color="red"
+                                icon={<Icon icon="tabler:trash" />}
+                                onClick={() => handleRemoveMember(item)}
+                              >
+                                Remove member
+                              </MenuItem>
+                            )}
+                          </MenuList>
+                        </Menu>
+                      </Flex>
+                    )}
+                  </Box>
+                ))}
+              </AccordionPanel>
+            </AccordionItem>
+          </Accordion>
+        )}
       </VStack>
     );
   }, [user, conversation, activeView, images, isMinimized]);
@@ -282,6 +495,14 @@ const ConversationInfo = ({
           </ModalBody>
         </ModalContent>
       </Modal>
+
+      {/* preview image group modal here */}
+      <ImageGroupPreview
+        isOpen={isImageGroupPreivewOpen}
+        url={avatarGroupUrl}
+        onClose={onCloseImageGroupPreview}
+        onClickUpdate={handleClickUpdate}
+      />
     </>
   );
 };

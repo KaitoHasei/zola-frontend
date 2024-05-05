@@ -8,7 +8,6 @@ const PreviewImageUpload = ({ images, onAddImage, onRemoveImage }) => {
   const [imageUrls, setImageUrls] = useState([]);
 
   useEffect(() => {
-    console.log("mount");
     const imageFiles = [];
     const fileReaders = [];
     let isCancel = false;
@@ -34,7 +33,6 @@ const PreviewImageUpload = ({ images, onAddImage, onRemoveImage }) => {
     }
 
     return () => {
-      console.log("un-mount");
       isCancel = true;
       fileReaders.forEach((fileReader) => {
         if (fileReader.readyState === 1) {

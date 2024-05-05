@@ -14,17 +14,17 @@ export const formatConversationName = (conversation, userId) => {
     ?.map((participant) => participant?.displayName)
     ?.join(", ");
 
-    console.log("conv : ", conversation);
   return conversationName;
 };
 
 export const getConversationAvatar = (conversation, userId) => {
   const participants = filterListParticipants(conversation, userId);
-  if (conversation?.participants?.length === 2) {
-    return participants?.[0]?.photoUrl;
+
+  if (conversation.isGroup) {
+    if (conversation?.groupImage) return conversation.groupImage;
+
+    return participants?.map((item) => item?.photoUrl || "");
   }
 
-  const groupImage = participants?.map((item) => item?.photoUrl || "");
-
-  return groupImage;
+  return participants?.[0]?.photoUrl;
 };

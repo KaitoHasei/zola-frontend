@@ -24,6 +24,16 @@ const ConversationList = () => {
   }, []);
 
   useEffect(() => {
+    const onGroupCreated = (data) => {
+      if (_.isEmpty(data)) return;
+
+      return setConversations((prev) => {
+        const _conversations = _.cloneDeep(prev);
+
+        return [data, ..._conversations];
+      });
+    };
+
     const onConversationUpdated = (data) => {
       if (_.isEmpty(data)) return;
 
@@ -34,19 +44,24 @@ const ConversationList = () => {
       if (indexOfConversation !== -1) {
         return setConversations((prev) => {
           const _conversations = _.cloneDeep(prev);
+          const _oldCovnersation = _conversations[indexOfConversation];
+
+          _.merge(_oldCovnersation, data);
 
           _conversations.splice(indexOfConversation, 1);
 
-          return [data, ..._conversations];
+          return [_oldCovnersation, ..._conversations];
         });
       }
 
       return setConversations((prev) => [data, ...prev]);
     };
 
+    socket.rootSocket?.on("group_created", onGroupCreated);
     socket.rootSocket?.on("conversation_updated", onConversationUpdated);
 
     return () => {
+      socket.rootSocket?.off("group_created", onGroupCreated);
       socket.rootSocket?.off("conversation_updated", onConversationUpdated);
     };
   }, [socket.rootSocket, conversations, setConversations]);
