@@ -11,6 +11,7 @@ import NotificationList from "#/pages/NotificationList";
 import RegisterSuccess from "#/pages/Register/RegisterSuccess";
 import SentedFriendRequest from "#/pages/SendtedFriendRequest";
 import ForgotPassword from "#/pages/ForgotPassword";
+import CallPage from "#/pages/CallPage";
 
 export const routes = [
   {
@@ -21,6 +22,10 @@ export const routes = [
       {
         path: "",
         element: <App />,
+      },
+      {
+        path: "/call/:conversationId",
+        element: <CallPage />,
       },
       {
         path: "/list-friend",

@@ -17,6 +17,7 @@ import {
 import PropTypes from "prop-types";
 import _ from "lodash";
 import { Icon } from "@iconify-icon/react";
+import { convertTime } from "#/utils";
 
 const Message = ({
   message,
@@ -42,17 +43,17 @@ const Message = ({
             ? previousSameUser && nextSameUser
               ? "18px 8px 8px 18px"
               : !previousSameUser && !nextSameUser
-              ? "18px"
-              : !previousSameUser && nextSameUser
-              ? "18px 4px 18px 18px"
-              : "18px 18px 4px 18px"
+                ? "18px"
+                : !previousSameUser && nextSameUser
+                  ? "18px 4px 18px 18px"
+                  : "18px 18px 4px 18px"
             : previousSameUser && nextSameUser
-            ? "8px 18px 18px 8px"
-            : !previousSameUser && !nextSameUser
-            ? "18px"
-            : !previousSameUser && nextSameUser
-            ? "4px 18px 18px 18px"
-            : "18px 18px 18px 4px"
+              ? "8px 18px 18px 8px"
+              : !previousSameUser && !nextSameUser
+                ? "18px"
+                : !previousSameUser && nextSameUser
+                  ? "4px 18px 18px 18px"
+                  : "18px 18px 18px 4px"
         }
         overflow="hidden"
       >
@@ -113,7 +114,7 @@ const Message = ({
             <Text fontSize="sm">{repliedTo.content}</Text>
           </Box>
         )}
-        {message?.typeMessage === "TEXT" ? (
+        {message?.typeMessage === "TEXT" && (
           <Text
             maxW="50%"
             padding="10px"
@@ -122,17 +123,17 @@ const Message = ({
                 ? previousSameUser && nextSameUser
                   ? "18px 8px 8px 18px"
                   : !previousSameUser && !nextSameUser
-                  ? "18px"
-                  : !previousSameUser && nextSameUser
-                  ? "18px 4px 18px 18px"
-                  : "18px 18px 4px 18px"
+                    ? "18px"
+                    : !previousSameUser && nextSameUser
+                      ? "18px 4px 18px 18px"
+                      : "18px 18px 4px 18px"
                 : previousSameUser && nextSameUser
-                ? "8px 18px 18px 8px"
-                : !previousSameUser && !nextSameUser
-                ? "18px"
-                : !previousSameUser && nextSameUser
-                ? "4px 18px 18px 18px"
-                : "18px 18px 18px 4px"
+                  ? "8px 18px 18px 8px"
+                  : !previousSameUser && !nextSameUser
+                    ? "18px"
+                    : !previousSameUser && nextSameUser
+                      ? "4px 18px 18px 18px"
+                      : "18px 18px 18px 4px"
             }
             bg={isSender ? "teal.500" : "blackAlpha.200"}
             color={isSender ? "white" : "black"}
@@ -140,8 +141,59 @@ const Message = ({
           >
             {message?.content}
           </Text>
-        ) : (
+        )}
+        {message?.typeMessage === "IMAGE" && (
           renderImageGrid
+        )}
+        {message?.typeMessage === "CALL" && (
+          <Text
+            maxW="50%"
+            padding="10px"
+            borderRadius={
+              isSender
+                ? previousSameUser && nextSameUser
+                  ? "18px 8px 8px 18px"
+                  : !previousSameUser && !nextSameUser
+                    ? "18px"
+                    : !previousSameUser && nextSameUser
+                      ? "18px 4px 18px 18px"
+                      : "18px 18px 4px 18px"
+                : previousSameUser && nextSameUser
+                  ? "8px 18px 18px 8px"
+                  : !previousSameUser && !nextSameUser
+                    ? "18px"
+                    : !previousSameUser && nextSameUser
+                      ? "4px 18px 18px 18px"
+                      : "18px 18px 18px 4px"
+            }
+            bg={isSender ? "teal.500" : "blackAlpha.200"}
+            color={isSender ? "white" : "black"}
+            fontSize="md"
+          >
+            <Flex direction="row">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={24}
+                height={24}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-video"
+                style={{marginRight: 20}}
+              >
+                <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5" />
+                <rect x={2} y={6} width={14} height={12} rx={2} />
+              </svg>
+              <Text>
+                {message?.content}
+              </Text>
+            </Flex>
+            <br />
+            <Text fontSize="sm" textAlign="right">{`At: ${convertTime(message?.createdAt)}`} </Text>
+          </Text>
         )}
         <Flex
           display="none"

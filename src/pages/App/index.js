@@ -18,6 +18,7 @@ import {
   HStack,
   Textarea,
   VStack,
+  Button,
 } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
@@ -36,6 +37,8 @@ import { SocketContext } from "#/contexts/SocketContext";
 import PreviewImageUpload from "#/components/PreviewImageUpload";
 import ConversationInfo from "./ConversationInfo";
 import EmojiPicker from "emoji-picker-react";
+
+
 function App() {
   const { user, conversationId } = useContext(GlobalContext);
   const { socket, setSocket } = useContext(SocketContext);
@@ -49,20 +52,23 @@ function App() {
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
   const [replyTo, setReplyTo] = useState(null);
 
-// Function to find the sender based on userId
-const _getSender = (userId) => {
-  return _.find(conversation?.participants, (participant) => {
-    return participant?.id === userId;
-  });
-};
+  const handleStartCall = () => {
+    window.location.href = `/call/${conversationId}`;
+  };
+  // Function to find the sender based on userId
+  const _getSender = (userId) => {
+    return _.find(conversation?.participants, (participant) => {
+      return participant?.id === userId;
+    });
+  };
 
-const startReply = (message) => {
-  const sender = _getSender(message.userId);
-  setReplyTo({
-    ...message,
-    sender: sender // Now the sender object is included
-  });
-};
+  const startReply = (message) => {
+    const sender = _getSender(message.userId);
+    setReplyTo({
+      ...message,
+      sender: sender // Now the sender object is included
+    });
+  };
 
   const cancelReply = () => {
     setReplyTo(null);
@@ -91,10 +97,10 @@ const startReply = (message) => {
 
   const ReplyPreview = ({ replyTo, onCancelReply }) => {
     if (!replyTo) return null;
-  
+
     // Ensure replyTo.sender is an object before trying to access its properties
     const senderDisplayName = replyTo.sender ? replyTo.sender.displayName : "Unknown";
-  
+
     return (
       <Box
         borderWidth="1px"
@@ -109,13 +115,13 @@ const startReply = (message) => {
         <Text fontSize="sm">Replying to {senderDisplayName}</Text>
         <Text fontSize="xs">{replyTo.content}</Text>
         <IconButton
-                  variant="ghost"
-                  icon={<Icon icon="icons8:cancel" />}
-                  fontSize="24px"
-                  onClick={onCancelReply}
-                  position="absolute"
-                  top="2px" right="2px"
-                />
+          variant="ghost"
+          icon={<Icon icon="icons8:cancel" />}
+          fontSize="24px"
+          onClick={onCancelReply}
+          position="absolute"
+          top="2px" right="2px"
+        />
       </Box>
     );
   };
@@ -148,7 +154,7 @@ const startReply = (message) => {
   // call api get data of conversation
   useEffect(() => {
     if (conversationId) {
-      get(`/conversations/${conversationId}`).then((res) =>{
+      get(`/conversations/${conversationId}`).then((res) => {
         setConversation(res?.data)
         console.log("res call : ", res?.data);
       }
@@ -205,7 +211,7 @@ const startReply = (message) => {
       sendReply(message);
       // Send newMessage to backend or add it to the state
       // ...
-      
+
       setReplyTo(null); // Clear the reply after sending
     }
     inputRef.current.value = "";
@@ -268,10 +274,9 @@ const startReply = (message) => {
     },
     [images]
   );
-
   const renderTitle = useMemo(() => {
     return (
-      <Flex padding="10px">
+      <Flex padding="10px" justifyContent="space-between">
         <Flex alignItems="center">
           <Box>
             {conversation?.isGroup ? (
@@ -293,6 +298,25 @@ const startReply = (message) => {
           <Text as="b" noOfLines={1} maxWidth="250px" marginLeft="10px">
             {formatConversationName(conversation, user.id)}
           </Text>
+        </Flex>
+        <Flex justifyContent="center" alignItems="center">
+          <Button backgroundColor="transparent" _hover={{ border: "1px", borderColor: "teal", backgroundColor: "transparent" }} onClick={handleStartCall}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={24}
+              height={24}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="teal"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-video"
+            >
+              <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5" />
+              <rect x={2} y={6} width={14} height={12} rx={2} />
+            </svg>
+          </Button>
         </Flex>
       </Flex>
     );
@@ -375,39 +399,39 @@ const startReply = (message) => {
               )}
               <Flex alignItems="center">
                 <VStack flex="1">
-                  
-                 <ReplyPreview replyTo={replyTo} onCancelReply={cancelReply} />
-                 <HStack width="100%">
-                 <Textarea
-                 flex="1"
-                  ref={inputRef}
-                  minHeight="auto"
-                  size="sm"
-                  variant="unstyled"
-                  resize="none"
-                  placeholder="Aa"
-                  _focus={{ borderColor: "unset", boxShadow: "unset" }}
-                  onKeyDown={(keydown) => {
-                    if (!keydown.shiftKey && keydown.code === "Enter")
-                      handleSendMessage();
-                  }}
-                />
-                <EmojiPicker
-                  style={{ position: "absolute", top: "-445px", right: "50px" }}
-                  open={openEmojiPicker}
-                  onEmojiClick={handleClickEmoji}
-                />
-                <IconButton
-                  variant="ghost"
-                  icon={<Icon icon="uil:smile" />}
-                  fontSize="24px"
-                  onClick={() => {
-                    if (!openEmojiPicker) return setOpenEmojiPicker(true);
 
-                    return setOpenEmojiPicker(false);
-                  }}
-                />
-                 </HStack>
+                  <ReplyPreview replyTo={replyTo} onCancelReply={cancelReply} />
+                  <HStack width="100%">
+                    <Textarea
+                      flex="1"
+                      ref={inputRef}
+                      minHeight="auto"
+                      size="sm"
+                      variant="unstyled"
+                      resize="none"
+                      placeholder="Aa"
+                      _focus={{ borderColor: "unset", boxShadow: "unset" }}
+                      onKeyDown={(keydown) => {
+                        if (!keydown.shiftKey && keydown.code === "Enter")
+                          handleSendMessage();
+                      }}
+                    />
+                    <EmojiPicker
+                      style={{ position: "absolute", top: "-445px", right: "50px" }}
+                      open={openEmojiPicker}
+                      onEmojiClick={handleClickEmoji}
+                    />
+                    <IconButton
+                      variant="ghost"
+                      icon={<Icon icon="uil:smile" />}
+                      fontSize="24px"
+                      onClick={() => {
+                        if (!openEmojiPicker) return setOpenEmojiPicker(true);
+
+                        return setOpenEmojiPicker(false);
+                      }}
+                    />
+                  </HStack>
                 </VStack>
               </Flex>
             </Box>

@@ -19,7 +19,7 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
-import { get} from "#/axios";
+import { get } from "#/axios";
 const ConversationInfo = ({
   user,
   conversation,
@@ -38,7 +38,7 @@ const ConversationInfo = ({
     setIsMinimized(!isMinimized);
     console.log("Minimize toggled", !isMinimized); // This should log the new state
   };
-  
+
   const [images, setImages] = useState([]);
 
   useEffect(() => {
@@ -94,7 +94,7 @@ const ConversationInfo = ({
   const renderConversationInfo = useMemo(() => {
     return (
       <VStack
-        key={isMinimized} 
+        key={isMinimized}
         width={isMinimized ? "5%" : "20%"}
         height="100%"
         padding={isMinimized ? "0.5rem" : "1rem"}
@@ -102,16 +102,16 @@ const ConversationInfo = ({
         position="relative"
         overflow={isMinimized ? "hidden" : "auto"}
       >
-      <IconButton
-  icon={<Icon icon={isMinimized ? "icon-park-twotone:expand-left" : "iconoir:sidebar-collapse"} />}
-  variant="ghost"
-  position="absolute"
-  top="2"
-  right="2"
-  onClick={toggleMinimize}
-  zIndex="1"
-  fontSize="24px"
-/>
+        <IconButton
+          icon={<Icon icon={isMinimized ? "icon-park-twotone:expand-left" : "iconoir:sidebar-collapse"} />}
+          variant="ghost"
+          position="absolute"
+          top="2"
+          right="2"
+          onClick={toggleMinimize}
+          zIndex="1"
+          fontSize="24px"
+        />
         {!isMinimized && activeView === "default" && (
           // ... render the rest of panel content only if not minimized
           <VStack width={"100%"}>
