@@ -28,3 +28,16 @@ export const getConversationAvatar = (conversation, userId) => {
 
   return participants?.[0]?.photoUrl;
 };
+
+export const convertTime = (isoString) => {
+  const date = new Date(isoString);
+    const minutes = date.getMinutes();
+    const hours = date.getHours();
+    const day = date.getDate();
+    const month = date.getMonth() + 1; 
+    const year = date.getFullYear();
+
+    const customFormat = `${hours}:${minutes} - ${day}/${month}/${year}`;
+
+    return customFormat;
+}

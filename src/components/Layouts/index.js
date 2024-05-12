@@ -33,7 +33,9 @@ import ContactNav from "../ContactNav";
 import ModelUser from "../ModelUser";
 import MenuSetting from "./MenuSetting";
 import AddGroupModal from "./AddGroupModal";
-
+import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
+import { ZIM } from "zego-zim-web";
+import { updateZego } from "#/pages/Callkit/Callkit";
 const AppLayout = () => {
   const {
     isOpen: isModalAddGroupOpen,
@@ -48,7 +50,7 @@ const AppLayout = () => {
   const [view, setView] = useState(VIEW_CHAT);
   const [dataSearch, setDataSearch] = useState([]);
 
-  // call api get data
+  // call api get data-
   useEffect(() => {
     try {
       const getData = async () => {
@@ -62,6 +64,29 @@ const AppLayout = () => {
     } catch (error) {}
   }, [setUser]);
 
+  useEffect(() => {
+    if (user && user.id && user.displayName) {
+      try {
+        const userID = user.id;
+        const userName = user.displayName;
+        const appID = 49365051;
+        const serverSecret = "352f68b05ab78fd52fa2db0cce0b4bb7";
+        const TOKEN = ZegoUIKitPrebuilt.generateKitTokenForTest(
+          appID,
+          serverSecret,
+          null,
+          userID,
+          userName
+        );
+
+        const zp = ZegoUIKitPrebuilt.create(TOKEN);
+        zp?.addPlugins({ ZIM });
+        updateZego(zp);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }, [user]);
   const getListFriend = async () => {
     const response = await get("/contacts/get-friends-user");
     if (response.status === 200) {

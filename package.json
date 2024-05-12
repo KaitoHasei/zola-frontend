@@ -9,12 +9,14 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "@zegocloud/zego-uikit-prebuilt": "^2.1.0",
     "axios": "^1.6.7",
     "date-fns": "^3.3.1",
     "emoji-picker-react": "^4.9.2",
     "framer-motion": "^11.0.3",
     "lodash": "^4.17.21",
     "moment": "^2.30.1",
+    "peerjs": "^1.5.2",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -22,8 +24,10 @@
     "react-router-dom": "^6.21.3",
     "react-scripts": "5.0.1",
     "sass": "^1.70.0",
+    "simple-peer": "^9.11.1",
     "socket.io-client": "^4.7.4",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "zego-zim-web": "^2.5.0"
   },
   "scripts": {
     "dev": "craco start",
