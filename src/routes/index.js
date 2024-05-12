@@ -33,20 +33,20 @@ export const routes = [
       },
       {
         path: "/list-group",
-        element: <ListGroup />
+        element: <ListGroup />,
       },
       {
         path: "/list-friend-request",
-        element: <FriendRequest />
+        element: <FriendRequest />,
       },
       {
         path: "/list-sented-friend",
-        element: <SentedFriendRequest />
+        element: <SentedFriendRequest />,
       },
       {
         path: "/notification",
-        element: <NotificationList />
-      }
+        element: <NotificationList />,
+      },
     ],
   },
   {
@@ -80,5 +80,5 @@ export const routes = [
         <ForgotPassword />
       </ProtectAuthRoutes>
     ),
-  }
+  },
 ];

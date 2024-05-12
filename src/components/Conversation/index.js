@@ -5,6 +5,7 @@ import { formatDistance } from "date-fns";
 import { formatConversationName, getConversationAvatar } from "#/utils";
 import { useContext } from "react";
 import { GlobalContext } from "#/contexts/GlobalContext";
+import ConversationAvatar from "./ConversationAvatar";
 
 const Conversation = ({ conversation, isRead, isSelect, onClick }) => {
   const { user } = useContext(GlobalContext);
@@ -29,20 +30,7 @@ const Conversation = ({ conversation, isRead, isSelect, onClick }) => {
         onClick={handleClick}
       >
         <Box width="20%">
-          {conversation?.isGroup ? (
-            <AvatarGroup size="sm" width="100%" flexWrap="wrap-reverse" max={3}>
-              {getConversationAvatar(conversation, user.id)?.map(
-                (item, index) => (
-                  <Avatar key={index} src={item} />
-                )
-              )}
-            </AvatarGroup>
-          ) : (
-            <Avatar
-              src={getConversationAvatar(conversation, user.id)}
-              bg="gray.400"
-            />
-          )}
+          <ConversationAvatar conversation={conversation} user={user} />
         </Box>
         <Box marginLeft="10px" flex={1}>
           <Flex justifyContent="space-between">

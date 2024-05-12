@@ -9,7 +9,7 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "@zegocloud/zego-uikit-prebuilt": "^2.0.1",
+    "@zegocloud/zego-uikit-prebuilt": "^2.1.0",
     "axios": "^1.6.7",
     "date-fns": "^3.3.1",
     "emoji-picker-react": "^4.9.2",
@@ -26,7 +26,8 @@
     "sass": "^1.70.0",
     "simple-peer": "^9.11.1",
     "socket.io-client": "^4.7.4",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "zego-zim-web": "^2.5.0"
   },
   "scripts": {
     "dev": "craco start",

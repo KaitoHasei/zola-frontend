@@ -37,7 +37,10 @@ import { SocketContext } from "#/contexts/SocketContext";
 import PreviewImageUpload from "#/components/PreviewImageUpload";
 import ConversationInfo from "./ConversationInfo";
 import EmojiPicker from "emoji-picker-react";
-
+import ConversationAvatar from "#/components/Conversation/ConversationAvatar";
+import { updateZego, zegoCall } from "../Callkit/Callkit";
+import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
+import { ZIM } from "zego-zim-web";
 
 function App() {
   const { user, conversationId } = useContext(GlobalContext);
@@ -52,8 +55,59 @@ function App() {
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
   const [replyTo, setReplyTo] = useState(null);
 
-  const handleStartCall = () => {
-    window.location.href = `/call/${conversationId}`;
+  const handleSentMessCall = async ({ message, conversationId }) => {
+    console.log(message, conversationId);
+    await post(`/conversations/${conversationId}/startVideoCall`, {
+      content: message,
+    });
+  };
+  async function handleSend(CallType) {
+    try {
+      if (conversation) {
+        // eslint-disable-next-line array-callback-return
+        const usersFilter = conversation?.participants.filter(
+          (participant) => participant?.id !== user?.id
+        );
+        const users = usersFilter.map((user) => {
+          return {
+            userID: user?.id,
+            userName: user?.displayName,
+          };
+        });
+
+        zegoCall
+          .sendCallInvitation({
+            callees: users,
+            callType: CallType,
+            timeout: 30,
+          })
+          .then((res) => {
+            console.warn(res);
+            if (res.errorInvitees.length) {
+              alert("The user dose not exist or is offline.");
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+        if (conversationId && user) {
+          const message = `${user.displayName}  has started a call.`;
+          await post(`/conversations/${conversationId}/startVideoCall`, {
+            content: message,
+          });
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  const handleStartCallVideo = () => {
+    handleSend(ZegoUIKitPrebuilt.InvitationTypeVideoCall);
+    /* window.location.href = `/call/${conversationId}`; */
+  };
+  const handleStartCallVoice = () => {
+    handleSend(ZegoUIKitPrebuilt.InvitationTypeVoiceCall);
   };
   // Function to find the sender based on userId
   const _getSender = (userId) => {
@@ -66,7 +120,7 @@ function App() {
     const sender = _getSender(message.userId);
     setReplyTo({
       ...message,
-      sender: sender // Now the sender object is included
+      sender: sender, // Now the sender object is included
     });
   };
 
@@ -79,18 +133,17 @@ function App() {
     const newMessage = {
       userId: user.id,
       content: newMessageContent,
-      repliedTo: replyTo ? {
-        userId: replyTo.userId,
-        displayName: replyTo.sender.displayName,
-        content: replyTo.content
-      } : null,
+      repliedTo: replyTo
+        ? {
+            userId: replyTo.userId,
+            displayName: replyTo.sender.displayName,
+            content: replyTo.content,
+          }
+        : null,
       // ...other message properties
     };
-    console.log(
-      `Replying to ${replyTo.content} with new message: ${newMessageContent}`
-    );
     // Add the new message to your messages array
-    setMessages(prevMessages => [...prevMessages, newMessage]);
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
     // After integrating with your backend, you would clear the replyTo state
     setReplyTo(null);
   };
@@ -99,7 +152,9 @@ function App() {
     if (!replyTo) return null;
 
     // Ensure replyTo.sender is an object before trying to access its properties
-    const senderDisplayName = replyTo.sender ? replyTo.sender.displayName : "Unknown";
+    const senderDisplayName = replyTo.sender
+      ? replyTo.sender.displayName
+      : "Unknown";
 
     return (
       <Box
@@ -120,7 +175,8 @@ function App() {
           fontSize="24px"
           onClick={onCancelReply}
           position="absolute"
-          top="2px" right="2px"
+          top="2px"
+          right="2px"
         />
       </Box>
     );
@@ -155,10 +211,8 @@ function App() {
   useEffect(() => {
     if (conversationId) {
       get(`/conversations/${conversationId}`).then((res) => {
-        setConversation(res?.data)
-        console.log("res call : ", res?.data);
-      }
-      );
+        setConversation(res?.data);
+      });
       get(`/conversations/${conversationId}/messages?pageSize=20`).then(
         (res) => {
           setMessages(res?.data?.message || []);
@@ -279,44 +333,66 @@ function App() {
       <Flex padding="10px" justifyContent="space-between">
         <Flex alignItems="center">
           <Box>
-            {conversation?.isGroup ? (
-              <AvatarGroup size="sm" max={3}>
-                {getConversationAvatar(conversation, user.id)?.map(
-                  (item, index) => (
-                    <Avatar key={index} src={item} />
-                  )
-                )}
-              </AvatarGroup>
-            ) : (
-              <Avatar
-                src={getConversationAvatar(conversation, user.id)}
-                size="sm"
-                bg="gray.400"
-              />
-            )}
+            <ConversationAvatar conversation={conversation} user={user} />
           </Box>
           <Text as="b" noOfLines={1} maxWidth="250px" marginLeft="10px">
             {formatConversationName(conversation, user.id)}
           </Text>
         </Flex>
-        <Flex justifyContent="center" alignItems="center">
-          <Button backgroundColor="transparent" _hover={{ border: "1px", borderColor: "teal", backgroundColor: "transparent" }} onClick={handleStartCall}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width={24}
-              height={24}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="teal"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-video"
+        <Flex>
+          <Flex justifyContent="center" alignItems="center">
+            <Button
+              backgroundColor="transparent"
+              _hover={{
+                border: "1px",
+                borderColor: "teal",
+                backgroundColor: "transparent",
+              }}
+              onClick={handleStartCallVoice}
             >
-              <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5" />
-              <rect x={2} y={6} width={14} height={12} rx={2} />
-            </svg>
-          </Button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={24}
+                height={24}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="teal"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-phone"
+              >
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+              </svg>
+            </Button>
+          </Flex>
+          <Flex justifyContent="center" alignItems="center">
+            <Button
+              backgroundColor="transparent"
+              _hover={{
+                border: "1px",
+                borderColor: "teal",
+                backgroundColor: "transparent",
+              }}
+              onClick={handleStartCallVideo}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={24}
+                height={24}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="teal"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-video"
+              >
+                <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5" />
+                <rect x={2} y={6} width={14} height={12} rx={2} />
+              </svg>
+            </Button>
+          </Flex>
         </Flex>
       </Flex>
     );
@@ -399,7 +475,6 @@ function App() {
               )}
               <Flex alignItems="center">
                 <VStack flex="1">
-
                   <ReplyPreview replyTo={replyTo} onCancelReply={cancelReply} />
                   <HStack width="100%">
                     <Textarea
@@ -417,7 +492,11 @@ function App() {
                       }}
                     />
                     <EmojiPicker
-                      style={{ position: "absolute", top: "-445px", right: "50px" }}
+                      style={{
+                        position: "absolute",
+                        top: "-445px",
+                        right: "50px",
+                      }}
                       open={openEmojiPicker}
                       onEmojiClick={handleClickEmoji}
                     />
@@ -478,6 +557,7 @@ function App() {
             getConversationAvatar={getConversationAvatar}
             formatConversationName={formatConversationName}
             conversationId={conversationId}
+            setConversation={setConversation}
           />
         </HStack>
       )}

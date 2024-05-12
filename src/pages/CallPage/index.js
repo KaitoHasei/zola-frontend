@@ -1,26 +1,34 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { useParams } from 'react-router-dom';
-import { Modal, ModalOverlay, ModalContent, ModalBody, ModalCloseButton, useDisclosure, ModalFooter, Button, Heading, Flex, Box, Input } from "@chakra-ui/react";
-import Peer from "simple-peer"
-import { GlobalContext } from "#/contexts/GlobalContext";
-import { SocketContext } from "#/contexts/SocketContext";
-import { getSocket } from "#/socket";
+import { useParams } from "react-router-dom";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
+  ModalFooter,
+  Button,
+  Heading,
+  Flex,
+  Box,
+  Input,
+} from "@chakra-ui/react";
 import Zego from "#/components/Zego";
 function CallPage() {
   let { conversationId } = useParams();
-  console.log("conversationId : ", conversationId)
-  const { isOpen, onOpen, onClose } = useDisclosure(); 
+  console.log("conversationId : ", conversationId);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
-  useEffect(()=> {
+  useEffect(() => {
     onOpen();
-  },[conversationId])
+  }, [conversationId]);
   const handleCloseModal = () => {
     onClose();
     window.location.href = "/";
   };
-  
 
-    return (
+  return (
     <>
       <Modal isOpen={isOpen} onClose={handleCloseModal} size="full">
         <ModalOverlay />
@@ -28,7 +36,7 @@ function CallPage() {
           <ModalCloseButton />
           <ModalBody>
             <>
-              <Zego/>
+              <Zego />
             </>
           </ModalBody>
           <ModalFooter>

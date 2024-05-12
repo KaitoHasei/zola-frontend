@@ -64,6 +64,12 @@ export const put = (path, payload, options = {}) => {
     .then((response) => response);
 };
 
+export const patch = (path, payload, options = {}) => {
+  return axiosClient
+    .patch(appendPath(path), payload, appendOption(options))
+    .then((response) => response);
+};
+
 export const del = (path, options) => {
   return axiosClient
     .delete(appendPath(path), appendOption(options))

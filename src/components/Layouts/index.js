@@ -7,7 +7,16 @@ import {
   useState,
 } from "react";
 import { Link, Outlet } from "react-router-dom";
-import { Box, Heading, Input, Spinner, Tooltip } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  Heading,
+  IconButton,
+  Input,
+  Spinner,
+  Tooltip,
+  useDisclosure,
+} from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
 
@@ -19,13 +28,20 @@ import { SocketContext } from "#/contexts/SocketContext";
 
 import UserSearched from "./SearchResult";
 import ConversationList from "./ConversationList";
-import { VIEW_CHAT, VIEW_CONTACT, VIEW_NOTI } from "#/constances/Active";
+import { VIEW_CHAT, VIEW_CONTACT } from "#/constances/Active";
 import ContactNav from "../ContactNav";
 import ModelUser from "../ModelUser";
 import MenuSetting from "./MenuSetting";
-import NotificationNav from "../NotificationNav";
-
+import AddGroupModal from "./AddGroupModal";
+import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
+import { ZIM } from "zego-zim-web";
+import { updateZego } from "#/pages/Callkit/Callkit";
 const AppLayout = () => {
+  const {
+    isOpen: isModalAddGroupOpen,
+    onOpen: onOpenModalAddGroup,
+    onClose: onCloseModalAddGroup,
+  } = useDisclosure();
   const { user, setUser, setConversationId } = useContext(GlobalContext);
   const { setSocket } = useContext(SocketContext);
   const searchRef = useRef(null);
@@ -34,7 +50,7 @@ const AppLayout = () => {
   const [view, setView] = useState(VIEW_CHAT);
   const [dataSearch, setDataSearch] = useState([]);
 
-  // call api get data
+  // call api get data-
   useEffect(() => {
     try {
       const getData = async () => {
@@ -45,16 +61,38 @@ const AppLayout = () => {
         }
       };
       getData();
-    } catch (error) { }
+    } catch (error) {}
   }, [setUser]);
 
+  useEffect(() => {
+    if (user && user.id && user.displayName) {
+      try {
+        const userID = user.id;
+        const userName = user.displayName;
+        const appID = 49365051;
+        const serverSecret = "352f68b05ab78fd52fa2db0cce0b4bb7";
+        const TOKEN = ZegoUIKitPrebuilt.generateKitTokenForTest(
+          appID,
+          serverSecret,
+          null,
+          userID,
+          userName
+        );
+
+        const zp = ZegoUIKitPrebuilt.create(TOKEN);
+        zp?.addPlugins({ ZIM });
+        updateZego(zp);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }, [user]);
   const getListFriend = async () => {
     const response = await get("/contacts/get-friends-user");
     if (response.status === 200) {
       setDataSearch(response.data);
-      console.log("response : ", response);
     }
-  }
+  };
 
   useEffect(() => {
     isSearch ? getListFriend() : setDataSearch([]);
@@ -85,11 +123,14 @@ const AppLayout = () => {
     const { value } = event?.target;
     if (!value.trim()) return;
     const filteredData = dataSearch?.filter((item) => {
-      if (item?.displayName.toLowerCase().includes(value?.toLowerCase()) || item?.email.toLowerCase().includes(value?.toLowerCase())) {
+      if (
+        item?.displayName.toLowerCase().includes(value?.toLowerCase()) ||
+        item?.email.toLowerCase().includes(value?.toLowerCase())
+      ) {
         return true;
       }
       return false;
-    })
+    });
     setListUser(filteredData);
   };
 
@@ -104,7 +145,7 @@ const AppLayout = () => {
 
         if (response?.status === 201)
           return setConversationId(response?.data?.id);
-      } catch (error) { }
+      } catch (error) {}
     },
     [setConversationId]
   );
@@ -138,7 +179,6 @@ const AppLayout = () => {
     );
   }, [isSearch, listUser, view, handleClickUserSearched]);
 
-
   return (
     <>
       {_.isEmpty(user) ? (
@@ -169,7 +209,7 @@ const AppLayout = () => {
             >
               <ModelUser />
             </Box>
-            <Tooltip placement='auto-start' label='Chat'>
+            <Tooltip placement="auto-start" label="Chat">
               <Link to="/">
                 <Box
                   width="100%"
@@ -179,8 +219,12 @@ const AppLayout = () => {
                   alignItems="center"
                   fontSize="28px"
                   borderRadius="10px"
-                  backgroundColor={view === VIEW_CHAT ? "rgba(0, 0, 0, 0.05)" : null}
-                  onClick={() => { setView(VIEW_CHAT) }}
+                  backgroundColor={
+                    view === VIEW_CHAT ? "rgba(0, 0, 0, 0.05)" : null
+                  }
+                  onClick={() => {
+                    setView(VIEW_CHAT);
+                  }}
                   _hover={{
                     cursor: "pointer",
                     backgroundColor: "rgba(0, 0, 0, 0.05)",
@@ -191,7 +235,7 @@ const AppLayout = () => {
                 </Box>
               </Link>
             </Tooltip>
-            <Tooltip placement='auto-start' label='Contact manager'>
+            <Tooltip placement="auto-start" label="Contact manager">
               <Link to="/list-friend">
                 <Box
                   width="100%"
@@ -205,12 +249,19 @@ const AppLayout = () => {
                     cursor: "pointer",
                     backgroundColor: "rgba(0, 0, 0, 0.05)",
                   }}
-                  backgroundColor={view === VIEW_CONTACT ? "rgba(0, 0, 0, 0.05)" : null}
+                  backgroundColor={
+                    view === VIEW_CONTACT ? "rgba(0, 0, 0, 0.05)" : null
+                  }
                   padding={1}
                   marginBottom={4}
                   onClick={() => setView(VIEW_CONTACT)}
                 >
-                  <Icon icon="system-uicons:contacts" width="100%" height="100%" style={{ color: "#008080" }} />
+                  <Icon
+                    icon="system-uicons:contacts"
+                    width="100%"
+                    height="100%"
+                    style={{ color: "#008080" }}
+                  />
                 </Box>
               </Link>
             </Tooltip>
@@ -236,7 +287,7 @@ const AppLayout = () => {
                 </Box>
               </Link>
             </Tooltip> */}
-            <Tooltip placement='bottom-end' label='setting'>
+            <Tooltip placement="bottom-end" label="setting">
               <Box width="100%" marginBottom={4}>
                 <MenuSetting />
               </Box>
@@ -253,40 +304,55 @@ const AppLayout = () => {
               paddingY="5px"
               borderBottom="1px solid #e5e5e5"
             >
-              <Heading size="sm">{view === VIEW_CHAT ? "Chat" : "Contact"}</Heading>
-              <Box display="flex" alignItems="center">
-                {isSearch && (
-                  <Box
-                    height="30px"
-                    marginRight="10px"
-                    aspectRatio={1}
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    fontSize="20px"
-                    borderRadius="100%"
-                    _hover={{
-                      cursor: "pointer",
-                      backgroundColor: "rgba(0, 0, 0, 0.05)",
-                    }}
-                    onClick={() => {
-                      searchRef.current.value = "";
-                      setSearch(false);
-                      setListUser([]);
-                    }}
-                  >
-                    <Icon icon="ion:arrow-back" />
-                  </Box>
-                )}
-                <Input
-                  ref={searchRef}
-                  my="10px"
-                  placeholder="Find people with email"
-                  onFocus={() => setSearch(true)}
-                  /* onChange={debounceLiveSearch} */
-                  onChange={handleLiveSearch}
-                />
-              </Box>
+              <Heading size="sm">
+                {view === VIEW_CHAT ? "Chat" : "Contact"}
+              </Heading>
+              <Flex alignItems="center" gap={2}>
+                <Flex alignItems="center" flex={1}>
+                  {isSearch && (
+                    <Box
+                      height="30px"
+                      marginRight="10px"
+                      aspectRatio={1}
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                      fontSize="20px"
+                      borderRadius="100%"
+                      _hover={{
+                        cursor: "pointer",
+                        backgroundColor: "rgba(0, 0, 0, 0.05)",
+                      }}
+                      onClick={() => {
+                        searchRef.current.value = "";
+                        setSearch(false);
+                        setListUser([]);
+                      }}
+                    >
+                      <Icon icon="ion:arrow-back" />
+                    </Box>
+                  )}
+                  <Input
+                    ref={searchRef}
+                    my="10px"
+                    placeholder="Search"
+                    onFocus={() => setSearch(true)}
+                    onChange={handleLiveSearch}
+                  />
+                </Flex>
+                <Box>
+                  <IconButton
+                    variant="ghost"
+                    icon={
+                      <Icon
+                        style={{ fontSize: "24px" }}
+                        icon="fluent-mdl2:add-group"
+                      />
+                    }
+                    onClick={onOpenModalAddGroup}
+                  />
+                </Box>
+              </Flex>
             </Box>
             {renderMainSidebar}
           </Box>
@@ -295,6 +361,12 @@ const AppLayout = () => {
           </Box>
         </Box>
       )}
+
+      {/* Modal Add Group here */}
+      <AddGroupModal
+        isOpen={isModalAddGroupOpen}
+        onClose={onCloseModalAddGroup}
+      />
     </>
   );
 };

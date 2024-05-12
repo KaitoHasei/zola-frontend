@@ -43,17 +43,17 @@ const Message = ({
             ? previousSameUser && nextSameUser
               ? "18px 8px 8px 18px"
               : !previousSameUser && !nextSameUser
-                ? "18px"
-                : !previousSameUser && nextSameUser
-                  ? "18px 4px 18px 18px"
-                  : "18px 18px 4px 18px"
+              ? "18px"
+              : !previousSameUser && nextSameUser
+              ? "18px 4px 18px 18px"
+              : "18px 18px 4px 18px"
             : previousSameUser && nextSameUser
-              ? "8px 18px 18px 8px"
-              : !previousSameUser && !nextSameUser
-                ? "18px"
-                : !previousSameUser && nextSameUser
-                  ? "4px 18px 18px 18px"
-                  : "18px 18px 18px 4px"
+            ? "8px 18px 18px 8px"
+            : !previousSameUser && !nextSameUser
+            ? "18px"
+            : !previousSameUser && nextSameUser
+            ? "4px 18px 18px 18px"
+            : "18px 18px 18px 4px"
         }
         overflow="hidden"
       >
@@ -123,17 +123,17 @@ const Message = ({
                 ? previousSameUser && nextSameUser
                   ? "18px 8px 8px 18px"
                   : !previousSameUser && !nextSameUser
-                    ? "18px"
-                    : !previousSameUser && nextSameUser
-                      ? "18px 4px 18px 18px"
-                      : "18px 18px 4px 18px"
+                  ? "18px"
+                  : !previousSameUser && nextSameUser
+                  ? "18px 4px 18px 18px"
+                  : "18px 18px 4px 18px"
                 : previousSameUser && nextSameUser
-                  ? "8px 18px 18px 8px"
-                  : !previousSameUser && !nextSameUser
-                    ? "18px"
-                    : !previousSameUser && nextSameUser
-                      ? "4px 18px 18px 18px"
-                      : "18px 18px 18px 4px"
+                ? "8px 18px 18px 8px"
+                : !previousSameUser && !nextSameUser
+                ? "18px"
+                : !previousSameUser && nextSameUser
+                ? "4px 18px 18px 18px"
+                : "18px 18px 18px 4px"
             }
             bg={isSender ? "teal.500" : "blackAlpha.200"}
             color={isSender ? "white" : "black"}
@@ -142,9 +142,7 @@ const Message = ({
             {message?.content}
           </Text>
         )}
-        {message?.typeMessage === "IMAGE" && (
-          renderImageGrid
-        )}
+        {message?.typeMessage === "IMAGE" && renderImageGrid}
         {message?.typeMessage === "CALL" && (
           <Text
             maxW="50%"
@@ -154,17 +152,17 @@ const Message = ({
                 ? previousSameUser && nextSameUser
                   ? "18px 8px 8px 18px"
                   : !previousSameUser && !nextSameUser
-                    ? "18px"
-                    : !previousSameUser && nextSameUser
-                      ? "18px 4px 18px 18px"
-                      : "18px 18px 4px 18px"
+                  ? "18px"
+                  : !previousSameUser && nextSameUser
+                  ? "18px 4px 18px 18px"
+                  : "18px 18px 4px 18px"
                 : previousSameUser && nextSameUser
-                  ? "8px 18px 18px 8px"
-                  : !previousSameUser && !nextSameUser
-                    ? "18px"
-                    : !previousSameUser && nextSameUser
-                      ? "4px 18px 18px 18px"
-                      : "18px 18px 18px 4px"
+                ? "8px 18px 18px 8px"
+                : !previousSameUser && !nextSameUser
+                ? "18px"
+                : !previousSameUser && nextSameUser
+                ? "4px 18px 18px 18px"
+                : "18px 18px 18px 4px"
             }
             bg={isSender ? "teal.500" : "blackAlpha.200"}
             color={isSender ? "white" : "black"}
@@ -182,17 +180,17 @@ const Message = ({
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 className="lucide lucide-video"
-                style={{marginRight: 20}}
+                style={{ marginRight: 20 }}
               >
                 <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5" />
                 <rect x={2} y={6} width={14} height={12} rx={2} />
               </svg>
-              <Text>
-                {message?.content}
-              </Text>
+              <Text>{message?.content}</Text>
             </Flex>
             <br />
-            <Text fontSize="sm" textAlign="right">{`At: ${convertTime(message?.createdAt)}`} </Text>
+            <Text fontSize="sm" textAlign="right">
+              {`At: ${convertTime(message?.createdAt)}`}{" "}
+            </Text>
           </Text>
         )}
         <Flex
