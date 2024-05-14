@@ -193,6 +193,41 @@ const Message = ({
             </Text>
           </Text>
         )}
+        {message?.typeMessage === "FILE" && (
+          <Flex
+            justifyContent={isSender ? "end" : "start"}
+            alignItems="center"
+            padding="10px"
+            borderRadius={
+              isSender
+                ? previousSameUser && nextSameUser
+                  ? "18px 8px 8px 18px"
+                  : !previousSameUser && !nextSameUser
+                  ? "18px"
+                  : !previousSameUser && nextSameUser
+                  ? "18px 4px 18px 18px"
+                  : "18px 18px 4px 18px"
+                : previousSameUser && nextSameUser
+                ? "8px 18px 18px 8px"
+                : !previousSameUser && !nextSameUser
+                ? "18px"
+                : !previousSameUser && nextSameUser
+                ? "4px 18px 18px 18px"
+                : "18px 18px 18px 4px"
+            }
+            bg={isSender ? "teal.500" : "blackAlpha.200"}
+            color={isSender ? "white" : "black"}
+          >
+            <Icon
+              icon="fluent:document-48-filled"
+              style={{ fontSize: "24px" }}
+            />
+            <Box ml="10px">
+              <Text fontSize="md">{message.fileName}</Text>
+              <Text fontSize="sm">{message.fileSize} MB</Text>
+            </Box>
+          </Flex>
+        )}
         <Flex
           display="none"
           _groupHover={{ display: "flex" }}
