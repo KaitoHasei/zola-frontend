@@ -48,19 +48,13 @@ function App() {
 
   const inputRef = useRef(null);
   const selectImageRef = useRef(null);
-
+  const fileInputRef = useRef(null);
   const [conversation, setConversation] = useState([]);
   const [images, setImages] = useState([]);
   const [messages, setMessages] = useState([]);
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
   const [replyTo, setReplyTo] = useState(null);
 
-  const handleSentMessCall = async ({ message, conversationId }) => {
-    console.log(message, conversationId);
-    await post(`/conversations/${conversationId}/startVideoCall`, {
-      content: message,
-    });
-  };
   async function handleSend(CallType) {
     try {
       if (conversation) {
@@ -285,7 +279,28 @@ function App() {
 
       setImages([]);
     }
+    if (!_.isEmpty(files)) {
+      const formData = new FormData();
 
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
+      //Chưa có api upload file
+      post(`/conversations/${conversationId}/files`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+        .then((response) => {
+          // This code runs if the server responds successfully
+          console.log("Files uploaded successfully:", response);
+          setFiles([]); // Clear the files state after sending
+        })
+        .catch((error) => {
+          // This code runs if there was an error
+          console.error("Failed to upload files:", error);
+        });
+    }
     if (!message) return;
 
     return post(`/conversations/${conversationId}/messages`, {
@@ -328,6 +343,24 @@ function App() {
     },
     [images]
   );
+
+  const [files, setFiles] = useState([]);
+
+  const handleFileChange = (event) => {
+    const selectedFiles = Array.from(event.target.files);
+    const totalSize = selectedFiles.reduce((acc, file) => acc + file.size, 0);
+
+    if (totalSize > 10 * 1024 * 1024) {
+      // 10MB in bytes
+      alert("Total file size exceeds the limit of 10MB.");
+    } else {
+      const filesToAdd = selectedFiles.slice(0, 5);
+      setFiles(filesToAdd);
+    }
+
+    event.target.value = "";
+  };
+
   const renderTitle = useMemo(() => {
     return (
       <Flex padding="10px" justifyContent="space-between">
@@ -458,6 +491,25 @@ function App() {
                 multiple
                 accept="image/png, image/jpeg"
                 onChange={handleChangeFile}
+              />
+              <IconButton
+                aria-label="send-file"
+                icon={<Icon icon="clarity:document-solid" />}
+                backgroundColor="unset"
+                borderRadius="100%"
+                fontSize="25px"
+                color="teal.500"
+                _hover={{ backgroundColor: "#e0e2e7" }}
+                onClick={() => fileInputRef.current.click()}
+              />
+              <input
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                type="file"
+                multiple
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.txt, .ppt, .pptx, .zip, .rar, .mp3, .mp4"
+                onChange={handleFileChange}
+                max="5"
               />
             </Box>
             <Box
