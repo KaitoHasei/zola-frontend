@@ -55,12 +55,6 @@ function App() {
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
   const [replyTo, setReplyTo] = useState(null);
 
-  const handleSentMessCall = async ({ message, conversationId }) => {
-    console.log(message, conversationId);
-    await post(`/conversations/${conversationId}/startVideoCall`, {
-      content: message,
-    });
-  };
   async function handleSend(CallType) {
     try {
       if (conversation) {
