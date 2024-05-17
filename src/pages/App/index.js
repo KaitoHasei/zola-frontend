@@ -19,6 +19,15 @@ import {
   Textarea,
   VStack,
   Button,
+  useDisclosure,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  Spinner,
 } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
@@ -38,9 +47,8 @@ import PreviewImageUpload from "#/components/PreviewImageUpload";
 import ConversationInfo from "./ConversationInfo";
 import EmojiPicker from "emoji-picker-react";
 import ConversationAvatar from "#/components/Conversation/ConversationAvatar";
-import { updateZego, zegoCall } from "../Callkit/Callkit";
+import { zegoCall } from "../Callkit/Callkit";
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
-import { ZIM } from "zego-zim-web";
 
 function App() {
   const { user, conversationId } = useContext(GlobalContext);
@@ -48,12 +56,61 @@ function App() {
 
   const inputRef = useRef(null);
   const selectImageRef = useRef(null);
-  const fileInputRef = useRef(null);
   const [conversation, setConversation] = useState([]);
   const [images, setImages] = useState([]);
   const [messages, setMessages] = useState([]);
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
   const [replyTo, setReplyTo] = useState(null);
+  const fileInputRef = useRef(null);
+  const { isOpen, onOpen, onClose: originalOnClose } = useDisclosure();
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleFileModalChange = (event) => {
+    const file = event.target.files[0];
+    console.log(event);
+    if (file) {
+      console.log(file);
+      setSelectedFile(file);
+      onOpen();
+      console.log("Modal opened");
+    }
+  };
+  const handleCloseModal = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    originalOnClose();
+  };
+
+  const handleSendFileModal = async () => {
+    setIsLoading(true);
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    try {
+      const response = await post(
+        `/conversations/${conversationId}/file`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        handleCloseModal();
+      } else {
+        console.error("Error uploading file: ", response.status);
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   async function handleSend(CallType) {
     try {
@@ -346,7 +403,7 @@ function App() {
 
   const [files, setFiles] = useState([]);
 
-  const handleFileChange = (event) => {
+  /* const handleFileChange = (event) => {
     const selectedFiles = Array.from(event.target.files);
     const totalSize = selectedFiles.reduce((acc, file) => acc + file.size, 0);
 
@@ -359,8 +416,7 @@ function App() {
     }
 
     event.target.value = "";
-  };
-
+  }; */
   const renderTitle = useMemo(() => {
     return (
       <Flex padding="10px" justifyContent="space-between">
@@ -507,9 +563,8 @@ function App() {
                 style={{ display: "none" }}
                 type="file"
                 multiple
-                accept=".pdf,.doc,.docx,.xls,.xlsx,.txt, .ppt, .pptx, .zip, .rar, .mp3, .mp4"
-                onChange={handleFileChange}
-                max="5"
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.ppt,.pptx,.zip,.rar,.mp3,.mp4"
+                onChange={handleFileModalChange}
               />
             </Box>
             <Box
@@ -613,6 +668,47 @@ function App() {
           />
         </HStack>
       )}
+      <Modal isOpen={isOpen} onClose={handleCloseModal}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>File Information</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {selectedFile && (
+              <VStack align="start" spacing={2}>
+                <Text>
+                  <strong>Name:</strong> {selectedFile.name}
+                </Text>
+                <Text>
+                  <strong>Type:</strong> {selectedFile.type || "Unknown"}
+                </Text>
+                <Text>
+                  <strong>Size:</strong>{" "}
+                  {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
+                </Text>
+              </VStack>
+            )}
+            {isLoading && <Spinner />}
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              colorScheme="blue"
+              mr={3}
+              onClick={handleSendFileModal}
+              isDisabled={isLoading}
+            >
+              Send File
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={handleCloseModal}
+              isDisabled={isLoading}
+            >
+              Cancel
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </>
   );
 }
