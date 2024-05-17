@@ -13,6 +13,7 @@ import {
   IconButton,
   MenuList,
   MenuItem,
+  Tooltip,
 } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import _ from "lodash";
@@ -92,6 +93,31 @@ const Message = ({
       </Box>
     );
   }, [message, isSender, previousSameUser, nextSameUser]);
+  const getFileTypeIcon = (fileType) => {
+    switch (fileType) {
+      case "application/pdf":
+        return "📄"; // PDF icon
+      case "application/vnd.ms-excel":
+      case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+        return "📊"; // Excel document icon
+      case "image/jpeg":
+      case "image/png":
+      case "image/gif":
+        return "🖼️"; // Image icon
+      case "application/zip":
+      case "application/x-rar-compressed":
+        return "📦"; // Archive icon
+      default:
+        return "📁"; // Default file icon
+    }
+  };
+
+  const fileTypeIcon = getFileTypeIcon(message.fileType);
+
+  const getFileNameFromUrl = (filePath) => {
+    const lastIndex = filePath.lastIndexOf("-");
+    return lastIndex !== -1 ? filePath.substring(lastIndex + 1) : filePath;
+  };
 
   return (
     <>
@@ -193,7 +219,7 @@ const Message = ({
             </Text>
           </Text>
         )}
-        {message?.typeMessage === "FILE" && (
+        {/* {message?.typeMessage === "FILE" && (
           <Flex
             justifyContent={isSender ? "end" : "start"}
             alignItems="center"
@@ -227,6 +253,139 @@ const Message = ({
               <Text fontSize="sm">{message.fileSize} MB</Text>
             </Box>
           </Flex>
+        )} */}
+        {message?.typeMessage === "FILE" && (
+          <Box
+            maxW="50%"
+            padding="10px"
+            borderRadius={
+              isSender
+                ? previousSameUser && nextSameUser
+                  ? "18px 8px 8px 18px"
+                  : !previousSameUser && !nextSameUser
+                  ? "18px"
+                  : !previousSameUser && nextSameUser
+                  ? "18px 4px 18px 18px"
+                  : "18px 18px 4px 18px"
+                : previousSameUser && nextSameUser
+                ? "8px 18px 18px 8px"
+                : !previousSameUser && !nextSameUser
+                ? "18px"
+                : !previousSameUser && nextSameUser
+                ? "4px 18px 18px 18px"
+                : "18px 18px 18px 4px"
+            }
+            bg={isSender ? "teal.500" : "blackAlpha.200"}
+            color={isSender ? "white" : "black"}
+            fontSize="md"
+          >
+            <Flex
+              direction="column"
+              alignItems="center"
+              justifyContent="space-between"
+            >
+              <Flex alignItems="center">
+                <Text fontSize="2xl" marginRight="10px">
+                  {fileTypeIcon}
+                </Text>
+                <Text>{getFileNameFromUrl(message?.content)}</Text>
+              </Flex>
+            </Flex>
+            <Box>
+              <Flex justifyContent="flex-end">
+                <Tooltip label="View File" aria-label="View File Tooltip">
+                  <svg
+                    onClick={() => window.open(message?.content, "_blank")}
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={24}
+                    height={24}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="lucide lucide-eye mr-2"
+                    style={{ marginLeft: 10, cursor: "pointer" }}
+                  >
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                    <circle cx={12} cy={12} r={3} />
+                  </svg>
+                </Tooltip>
+                <Tooltip
+                  label="Download File"
+                  aria-label="Download File Tooltip"
+                >
+                  <svg
+                    onClick={() => {
+                      const link = document.createElement("a");
+                      link.href = message?.content;
+                      link.download = message.fileName;
+                      link.style.display = "none";
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={24}
+                    height={24}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ marginLeft: 10, cursor: "pointer" }}
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                </Tooltip>
+              </Flex>
+            </Box>
+            <br />
+            <Text fontSize="sm" textAlign="right">
+              {`At: ${convertTime(message?.createdAt)}`}
+            </Text>
+          </Box>
+        )}
+        {message?.typeMessage === "VIDEO" && (
+          <Box
+            maxW="50%"
+            padding="10px"
+            borderRadius={
+              isSender
+                ? previousSameUser && nextSameUser
+                  ? "18px 8px 8px 18px"
+                  : !previousSameUser && !nextSameUser
+                  ? "18px"
+                  : !previousSameUser && nextSameUser
+                  ? "18px 4px 18px 18px"
+                  : "18px 18px 4px 18px"
+                : previousSameUser && nextSameUser
+                ? "8px 18px 18px 8px"
+                : !previousSameUser && !nextSameUser
+                ? "18px"
+                : !previousSameUser && nextSameUser
+                ? "4px 18px 18px 18px"
+                : "18px 18px 18px 4px"
+            }
+            bg={isSender ? "teal.500" : "blackAlpha.200"}
+            color={isSender ? "white" : "black"}
+            fontSize="md"
+          >
+            <video controls width="100%">
+              <source src={message?.content} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+            <Text textAlign="right" padding="8px">
+              {getFileNameFromUrl(message?.content)}
+            </Text>
+            <Text fontSize="sm" textAlign="right">
+              {`At: ${convertTime(message?.createdAt)}`}
+            </Text>
+          </Box>
         )}
         <Flex
           display="none"
