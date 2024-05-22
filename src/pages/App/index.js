@@ -44,36 +44,41 @@ import Message from "#/components/Message";
 import "./App.scss";
 import { SocketContext } from "#/contexts/SocketContext";
 import PreviewImageUpload from "#/components/PreviewImageUpload";
-import ConversationInfo from "./ConversationInfo";
 import EmojiPicker from "emoji-picker-react";
 import ConversationAvatar from "#/components/Conversation/ConversationAvatar";
 import { zegoCall } from "../Callkit/Callkit";
 import { ZegoUIKitPrebuilt } from "@zegocloud/zego-uikit-prebuilt";
+import ConversationSidebar from "./ConversationSidebar";
 
 function App() {
+  const { isOpen, onOpen, onClose: originalOnClose } = useDisclosure();
+  const {
+    isOpen: isExpandSidebar,
+    onOpen: onOpenSidebar,
+    onClose: onCloseSidebar,
+  } = useDisclosure();
+
   const { user, conversationId } = useContext(GlobalContext);
   const { socket, setSocket } = useContext(SocketContext);
 
   const inputRef = useRef(null);
   const selectImageRef = useRef(null);
+  const fileInputRef = useRef(null);
+
   const [conversation, setConversation] = useState([]);
   const [images, setImages] = useState([]);
   const [messages, setMessages] = useState([]);
   const [openEmojiPicker, setOpenEmojiPicker] = useState(false);
   const [replyTo, setReplyTo] = useState(null);
-  const fileInputRef = useRef(null);
-  const { isOpen, onOpen, onClose: originalOnClose } = useDisclosure();
   const [selectedFile, setSelectedFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleFileModalChange = (event) => {
     const file = event.target.files[0];
-    console.log(event);
+
     if (file) {
-      console.log(file);
       setSelectedFile(file);
       onOpen();
-      console.log("Modal opened");
     }
   };
   const handleCloseModal = () => {
@@ -280,14 +285,11 @@ function App() {
       }
     };
     const onRevokeMessage = (message) => {
-      const _message = [...messages];
-      const indexOfMessage = _message.findIndex(
-        (item) => item.cuid === message.cuid
-      );
+      const _messages = _.cloneDeep(messages);
 
-      _message.splice(indexOfMessage, 1);
+      _.remove(_messages, (_message) => _message.cuid === message.cuid);
 
-      setMessages(_message);
+      setMessages(_messages);
     };
 
     socket.chatSocket?.on("sent_message", onNewMessage);
@@ -311,6 +313,7 @@ function App() {
 
   const handleSendMessage = useCallback(() => {
     const message = inputRef.current.value.trim();
+
     if (replyTo) {
       // Add logic to create a new message object with repliedTo data
       sendReply(message);
@@ -319,8 +322,10 @@ function App() {
 
       setReplyTo(null); // Clear the reply after sending
     }
+
     inputRef.current.value = "";
     setReplyTo(null);
+
     if (!_.isEmpty(images)) {
       const formData = new FormData();
 
@@ -336,6 +341,7 @@ function App() {
 
       setImages([]);
     }
+
     if (!_.isEmpty(files)) {
       const formData = new FormData();
 
@@ -358,6 +364,7 @@ function App() {
           console.error("Failed to upload files:", error);
         });
     }
+
     if (!message) return;
 
     return post(`/conversations/${conversationId}/messages`, {
@@ -428,7 +435,7 @@ function App() {
             {formatConversationName(conversation, user.id)}
           </Text>
         </Flex>
-        <Flex>
+        <Flex alignItems="center">
           <Flex justifyContent="center" alignItems="center">
             <Button
               backgroundColor="transparent"
@@ -482,10 +489,33 @@ function App() {
               </svg>
             </Button>
           </Flex>
+          {isExpandSidebar ? (
+            <IconButton
+              variant="ghost"
+              icon={
+                <Icon
+                  style={{ fontSize: "28px" }}
+                  icon="tabler:layout-sidebar-left-expand"
+                />
+              }
+              onClick={() => onCloseSidebar()}
+            />
+          ) : (
+            <IconButton
+              variant="ghost"
+              icon={
+                <Icon
+                  style={{ fontSize: "28px" }}
+                  icon="tabler:layout-sidebar-right-expand"
+                />
+              }
+              onClick={() => onOpenSidebar()}
+            />
+          )}
         </Flex>
       </Flex>
     );
-  }, [user, conversation]);
+  }, [user, conversation, isExpandSidebar, onOpenSidebar, onCloseSidebar]);
 
   const renderFeedChild = useMemo(() => {
     const _getSender = (userId) => {
@@ -654,19 +684,16 @@ function App() {
           </Text>
         </Box>
       ) : (
-        <HStack height="100%" gap="0">
+        <Flex height="100%">
           <FeedLayout height="100%" title={renderTitle} flex="1">
             {renderFeedChild}
           </FeedLayout>
-          <ConversationInfo
-            user={user}
+          <ConversationSidebar
+            isOpen={isExpandSidebar}
             conversation={conversation}
-            getConversationAvatar={getConversationAvatar}
-            formatConversationName={formatConversationName}
-            conversationId={conversationId}
             setConversation={setConversation}
           />
-        </HStack>
+        </Flex>
       )}
       <Modal isOpen={isOpen} onClose={handleCloseModal}>
         <ModalOverlay />

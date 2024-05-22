@@ -30,14 +30,16 @@ const EditableControls = () => {
       />
     </ButtonGroup>
   ) : (
-    <Flex position="absolute" justifyContent="center" top="0" right="-35px">
-      <IconButton
-        size="md"
-        variant="unset"
-        icon={<Icon icon="iconamoon:edit" />}
-        {...getEditButtonProps()}
-      />
-    </Flex>
+    <IconButton
+      position="absolute"
+      top={0}
+      right="-35px"
+      size="md"
+      variant="unset"
+      textColor="teal.500"
+      icon={<Icon icon="iconamoon:edit" />}
+      {...getEditButtonProps()}
+    />
   );
 };
 

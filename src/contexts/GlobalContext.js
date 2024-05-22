@@ -4,6 +4,7 @@ export const GlobalContext = createContext();
 
 export const GlobalProvider = ({ children }) => {
   const [user, setUser] = useState({});
+  const [listFriend, setListFriend] = useState([]);
   const [conversationId, setConversationId] = useState("");
 
   const logIn = (token = "") => {
@@ -21,8 +22,10 @@ export const GlobalProvider = ({ children }) => {
     <GlobalContext.Provider
       value={{
         user,
+        listFriend,
         conversationId,
         setUser,
+        setListFriend,
         setConversationId,
         logIn,
         logOut,

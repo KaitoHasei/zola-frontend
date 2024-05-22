@@ -13,6 +13,7 @@ import { SocketContext } from "#/contexts/SocketContext";
 const ConversationList = () => {
   const { user, conversationId, setConversationId } = useContext(GlobalContext);
   const { socket } = useContext(SocketContext);
+
   const [conversations, setConversations] = useState([]);
 
   useEffect(() => {
@@ -57,14 +58,35 @@ const ConversationList = () => {
       return setConversations((prev) => [data, ...prev]);
     };
 
+    const onRemovedFromGroup = (data) => {
+      if (_.isEmpty(data)) return;
+
+      const conversationRemovedId = data?.id;
+
+      if (conversationId === conversationRemovedId) setConversationId(null);
+
+      return setConversations((prev) => {
+        const _conversations = _.cloneDeep(prev);
+
+        _.remove(
+          _conversations,
+          (conversation) => conversation.id === conversationRemovedId
+        );
+
+        return _conversations;
+      });
+    };
+
     socket.rootSocket?.on("group_created", onGroupCreated);
     socket.rootSocket?.on("conversation_updated", onConversationUpdated);
+    socket.rootSocket?.on("removed_from-group", onRemovedFromGroup);
 
     return () => {
       socket.rootSocket?.off("group_created", onGroupCreated);
       socket.rootSocket?.off("conversation_updated", onConversationUpdated);
+      socket.rootSocket?.off("removed_from-group", onRemovedFromGroup);
     };
-  }, [socket.rootSocket, conversations, setConversations]);
+  }, [socket.rootSocket, conversationId, conversations, setConversations]);
 
   const handleClickConversation = (conversationId) => {
     setConversationId(conversationId);

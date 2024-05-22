@@ -42,13 +42,13 @@ const AppLayout = () => {
     onOpen: onOpenModalAddGroup,
     onClose: onCloseModalAddGroup,
   } = useDisclosure();
-  const { user, setUser, setConversationId } = useContext(GlobalContext);
+  const { user, listFriend, setUser, setListFriend, setConversationId } =
+    useContext(GlobalContext);
   const { setSocket } = useContext(SocketContext);
   const searchRef = useRef(null);
   const [isSearch, setSearch] = useState(false);
   const [listUser, setListUser] = useState([]);
   const [view, setView] = useState(VIEW_CHAT);
-  const [dataSearch, setDataSearch] = useState([]);
 
   // call api get data-
   useEffect(() => {
@@ -60,9 +60,18 @@ const AppLayout = () => {
           setUser(me?.data);
         }
       };
+
+      const getListFriend = async () => {
+        const response = await get("/contacts/get-friends-user");
+        if (response?.status === 200) {
+          setListFriend(response.data);
+        }
+      };
+
       getData();
+      getListFriend();
     } catch (error) {}
-  }, [setUser]);
+  }, []);
 
   useEffect(() => {
     if (user && user.id && user.displayName) {
@@ -87,16 +96,6 @@ const AppLayout = () => {
       }
     }
   }, [user]);
-  const getListFriend = async () => {
-    const response = await get("/contacts/get-friends-user");
-    if (response.status === 200) {
-      setDataSearch(response.data);
-    }
-  };
-
-  useEffect(() => {
-    isSearch ? getListFriend() : setDataSearch([]);
-  }, [isSearch]);
 
   // connect with root socket
   useEffect(() => {
@@ -121,8 +120,12 @@ const AppLayout = () => {
 
   const handleLiveSearch = (event) => {
     const { value } = event?.target;
+
     if (!value.trim()) return;
-    const filteredData = dataSearch?.filter((item) => {
+
+    const _listFriend = _.cloneDeep(listFriend);
+
+    const filteredData = _listFriend?.filter((item) => {
       if (
         item?.displayName.toLowerCase().includes(value?.toLowerCase()) ||
         item?.email.toLowerCase().includes(value?.toLowerCase())
@@ -131,6 +134,7 @@ const AppLayout = () => {
       }
       return false;
     });
+
     setListUser(filteredData);
   };
 
@@ -150,13 +154,12 @@ const AppLayout = () => {
     [setConversationId]
   );
 
-  /* const debounceLiveSearch = _.debounce(handleLiveSearch, 300); */
+  const debounceLiveSearch = _.debounce(handleLiveSearch, 300);
 
   const renderMainSidebar = useMemo(() => {
     const viewByPath = {
       VIEW_CHAT: () => <ConversationList />,
       VIEW_CONTACT: () => <ContactNav />,
-      /* VIEW_NOTI : () => <NotificationNav/>, */
     };
 
     return (
@@ -265,28 +268,6 @@ const AppLayout = () => {
                 </Box>
               </Link>
             </Tooltip>
-            {/* <Tooltip placement='auto-start' label='notification'>
-              <Link to="/notification">
-                <Box
-                  width="100%"
-                  aspectRatio={1}
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                  fontSize="28px"
-                  borderRadius="10px"
-                  backgroundColor={view === VIEW_NOTI ? "rgba(0, 0, 0, 0.05)" : null}
-                  onClick={() => { setView(VIEW_NOTI) }}
-                  _hover={{
-                    cursor: "pointer",
-                    backgroundColor: "rgba(0, 0, 0, 0.05)",
-                  }}
-                  marginBottom={4}
-                >
-                  <Icon icon="solar:notification-unread-lines-outline" style={{ color: "#008080" }} />
-                </Box>
-              </Link>
-            </Tooltip> */}
             <Tooltip placement="bottom-end" label="setting">
               <Box width="100%" marginBottom={4}>
                 <MenuSetting />
@@ -304,7 +285,7 @@ const AppLayout = () => {
               paddingY="5px"
               borderBottom="1px solid #e5e5e5"
             >
-              <Heading size="sm">
+              <Heading size="md">
                 {view === VIEW_CHAT ? "Chat" : "Contact"}
               </Heading>
               <Flex alignItems="center" gap={2}>
@@ -337,7 +318,7 @@ const AppLayout = () => {
                     my="10px"
                     placeholder="Search"
                     onFocus={() => setSearch(true)}
-                    onChange={handleLiveSearch}
+                    onChange={debounceLiveSearch}
                   />
                 </Flex>
                 <Box>

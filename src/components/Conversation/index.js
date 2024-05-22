@@ -1,8 +1,8 @@
-import { Box, Flex, Avatar, AvatarGroup, Text } from "@chakra-ui/react";
+import { Box, Flex, Text } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import { formatDistance } from "date-fns";
 
-import { formatConversationName, getConversationAvatar } from "#/utils";
+import { formatConversationName } from "#/utils";
 import { useContext } from "react";
 import { GlobalContext } from "#/contexts/GlobalContext";
 import ConversationAvatar from "./ConversationAvatar";

@@ -1,6 +1,6 @@
-import { get, post } from "#/axios";
+import { post } from "#/axios";
+import { GlobalContext } from "#/contexts/GlobalContext";
 import {
-  IconButton,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -18,55 +18,40 @@ import {
   Text,
   ModalFooter,
   Button,
-  useDisclosure,
 } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import _ from "lodash";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
-const AddUserGroup = ({ conversation, setConversation }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [friendList, setFriendList] = useState([]);
+const AddUserGroup = ({ isOpen, conversation, onClose, setConversation }) => {
+  const { listFriend } = useContext(GlobalContext);
+
+  const [remainingFriends, setRemainingFriends] = useState([]);
   const [userSearched, setUserSearched] = useState([]);
   const [selectedUser, setSelectedUser] = useState([]);
 
   useEffect(() => {
-    const fetchFriend = async () => {
-      try {
-        const response = await get("/contacts/get-friends-user");
-        if (response.status === 200) {
-          const _friendList = response.data;
-          const _groupMemberExistId = conversation.participants.map(
-            ({ id }) => id
-          );
+    const _listFriend = _.cloneDeep(listFriend);
+    const _groupMemberExistId = conversation.participants?.map(({ id }) => id);
 
-          _.remove(
-            _friendList,
-            (item) => _groupMemberExistId.indexOf(item.id) >= 0
-          );
+    _.remove(
+      _listFriend,
+      (friend) => _groupMemberExistId?.indexOf(friend.id) >= 0
+    );
 
-          console.log(_friendList);
-
-          setFriendList(_friendList);
-          setUserSearched(_friendList);
-        }
-      } catch (error) {
-        console.error("Error fetching images:", error);
-      }
-    };
-
-    fetchFriend();
-  }, []);
+    setRemainingFriends(_listFriend);
+    setUserSearched(_listFriend);
+  }, [listFriend, conversation]);
 
   const handleLiveSearch = (event) => {
     const { value } = event?.target;
 
     if (!value.trim()) {
-      setUserSearched([...friendList]);
+      setUserSearched([...remainingFriends]);
       return;
     }
 
-    const filteredData = friendList?.filter((item) => {
+    const filteredData = remainingFriends?.filter((item) => {
       if (
         item?.displayName.toLowerCase().includes(value?.toLowerCase()) ||
         item?.email.toLowerCase().includes(value?.toLowerCase())
@@ -75,6 +60,7 @@ const AddUserGroup = ({ conversation, setConversation }) => {
       }
       return false;
     });
+
     setUserSearched(filteredData);
   };
 
@@ -95,11 +81,6 @@ const AddUserGroup = ({ conversation, setConversation }) => {
 
   return (
     <>
-      <IconButton
-        icon={<Icon icon="fluent-mdl2:add-group" />}
-        variant="ghost"
-        onClick={onOpen}
-      />
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>

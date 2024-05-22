@@ -20,40 +20,33 @@ import {
   Text,
   Image,
   Button,
+  useToast,
 } from "@chakra-ui/react";
 import { Icon } from "@iconify-icon/react";
 import PropTypes from "prop-types";
+import _ from "lodash";
 
-import { get, patch, post } from "#/axios";
+import { patch, post } from "#/axios";
 
 import { GlobalContext } from "#/contexts/GlobalContext";
 
 const AddGroupModal = ({ isOpen, onClose }) => {
-  const { setConversationId } = useContext(GlobalContext);
+  const toast = useToast();
+
+  const { listFriend, setConversationId } = useContext(GlobalContext);
   const groupImageInputRef = useRef(null);
   const groupNameInputRef = useRef(null);
 
-  const [friendList, setFriendList] = useState([]);
+  // const [friendList, setFriendList] = useState([]);
   const [userSearched, setUserSearched] = useState([]);
   const [groupMembers, setGroupMembers] = useState([]);
   const [avatarGroup, setAvatarGroup] = useState(null);
   const [avatarUrl, setAvatarURL] = useState(null);
 
   useEffect(() => {
-    const fetchFriend = async () => {
-      try {
-        const response = await get("/contacts/get-friends-user");
-        if (response.status === 200) {
-          setFriendList(response.data);
-          setUserSearched(response.data);
-        }
-      } catch (error) {
-        console.error("Error fetching images:", error);
-      }
-    };
-
-    fetchFriend();
-  }, []);
+    if (_.isArray(listFriend) && !_.isEmpty(listFriend))
+      setUserSearched(listFriend);
+  }, [listFriend]);
 
   useEffect(() => {
     let fileReader,
@@ -82,8 +75,21 @@ const AddGroupModal = ({ isOpen, onClose }) => {
 
   const handlePickImage = (event) => {
     const _image = event.target.files[0];
+    const imageSizeLimit = 180 * 180 * 5;
+    const imageSize = _image.size;
 
     event.target.value = "";
+
+    if (imageSize > imageSizeLimit) {
+      toast({
+        title: "image size is too large",
+        status: "error",
+        position: "top-right",
+        isClosable: true,
+      });
+
+      return;
+    }
 
     setAvatarGroup(_image);
   };
@@ -94,13 +100,14 @@ const AddGroupModal = ({ isOpen, onClose }) => {
 
   const handleLiveSearch = (event) => {
     const { value } = event?.target;
+    const _listFriend = _.cloneDeep(listFriend);
 
     if (!value.trim()) {
-      setUserSearched([...friendList]);
+      setUserSearched([..._listFriend]);
       return;
     }
 
-    const filteredData = friendList?.filter((item) => {
+    const filteredData = _listFriend?.filter((item) => {
       if (
         item?.displayName.toLowerCase().includes(value?.toLowerCase()) ||
         item?.email.toLowerCase().includes(value?.toLowerCase())
@@ -109,6 +116,7 @@ const AddGroupModal = ({ isOpen, onClose }) => {
       }
       return false;
     });
+
     setUserSearched(filteredData);
   };
 
